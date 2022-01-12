@@ -22,7 +22,9 @@ classifiers = [
 python = ">=3.7,<3.11"
 
 [tool.poetry.dev-dependencies]
+tox = "^3.24.5"
 mypy = "^0.931"
+tox-poetry-dev-dependencies = "^0.0.9"
 
 [tool.poetry.scripts]
 mypy-json-report = "mypy_json_report:main"
