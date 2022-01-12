@@ -2,7 +2,8 @@ import json
 import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from typing import Iterator
+from typing import Counter as CounterType
+from typing import Dict, Iterator
 
 
 def main():
@@ -37,12 +38,12 @@ def _extract_errors(lines: Iterator[str]) -> Iterator[MypyError]:
         yield MypyError(filename=location.split(":")[0], message=message)
 
 
-def _count_errors(errors: Iterator[MypyError]) -> Counter[MypyError]:
+def _count_errors(errors: Iterator[MypyError]) -> CounterType[MypyError]:
     """Count and deduplicate MypyError objects."""
     return Counter(errors)
 
 
-def _structure_errors(errors: Counter[MypyError]) -> dict[str, dict[str, int]]:
+def _structure_errors(errors: CounterType[MypyError]) -> Dict[str, Dict[str, int]]:
     """
     Produce a structure to hold the mypy errors.
 
@@ -57,7 +58,7 @@ def _structure_errors(errors: Counter[MypyError]) -> dict[str, dict[str, int]]:
             ...
         }
     """
-    grouped_errors: dict[str, dict[str, int]] = defaultdict(dict)
+    grouped_errors: Dict[str, Dict[str, int]] = defaultdict(dict)
     for error, frequency in errors.items():
         grouped_errors[error.filename][error.message] = frequency
 
