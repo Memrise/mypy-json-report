@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "mypy-json-report"
+version = "0.1.0"
+description = "Generate a JSON report from your mypy output"
+authors = ["Charlie Denton <charlie@meshy.co.uk>"]
+license = "Apache-2.0"
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Software Development",
+    "Topic :: Utilities",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.7,<3.11"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
