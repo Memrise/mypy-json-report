@@ -1,0 +1,6 @@
+{
+  "mypy_json_report.py": {
+    "Call to untyped function \"main\" in typed context": 1,
+    "Function is missing a return type annotation": 1
+  }
+}
