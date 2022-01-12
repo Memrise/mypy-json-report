@@ -5,6 +5,10 @@ from dataclasses import dataclass
 from typing import Iterator
 
 
+def main():
+    print(produce_errors_report(sys.stdin))
+
+
 @dataclass(frozen=True)
 class MypyError:
     filename: str
@@ -61,4 +65,4 @@ def _structure_errors(errors: Counter[MypyError]) -> dict[str, dict[str, int]]:
 
 
 if __name__ == "__main__":
-    print(produce_errors_report(sys.stdin))
+    main()
