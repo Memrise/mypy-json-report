@@ -6,7 +6,7 @@ from typing import Counter as CounterType
 from typing import Dict, Iterator
 
 
-def main():
+def main() -> None:
     print(produce_errors_report(sys.stdin))
 
 
