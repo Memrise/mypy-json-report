@@ -1,6 +1,6 @@
-# MyPy JSON Report
+# Mypy JSON Report
 
-A JSON report of your MyPy output
+A JSON report of your mypy output
 that helps you push towards full type coverage of your project.
 
 ## Quickstart
@@ -10,7 +10,7 @@ Install with pip.
 pip install mypy-json-report
 ```
 
-Pipe the output of MyPy through the `mypy-json-report` CLI app.
+Pipe the output of mypy through the `mypy-json-report` CLI app.
 Store the output to a file, and commit it to your git repo.
 
 ```
@@ -24,7 +24,7 @@ Compare against this file when making changes to your project to catch regressio
 
 ## Example output
 
-If MyPy was showing you errors like this:
+If mypy was showing you errors like this:
 
 ```
 example.py:8: error: Function is missing a return type annotation
@@ -56,7 +56,7 @@ You could create a GitHub Action to catch regressions (or improvements).
 
 ```yaml
 ---
-name: MyPy check
+name: Mypy check
 
 on: [push]
 
