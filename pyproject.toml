@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "Generate a JSON report from your mypy output"
 authors = ["Charlie Denton <charlie@meshy.co.uk>"]
 license = "Apache-2.0"
+repository = "https://github.com/memrise/mypy-json-report"
+readme = "README.md"
 classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
@@ -17,6 +19,9 @@ classifiers = [
     "Topic :: Software Development",
     "Topic :: Utilities",
 ]
+
+[project.urls]
+Source = "https://github.com/memrise/mypy-json-report"
 
 [tool.poetry.dependencies]
 python = ">=3.7,<3.11"
