@@ -1,5 +1,9 @@
 # Changelog for mypy-json-report
 
+## Upcoming
+
+- Remove upper limit on Python version. This fixes compatibility with newly created Poetry projects.
+
 ## v0.1.2 [2022-01-17]
 
 - Trial releasing with GitHub actions.
