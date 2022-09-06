@@ -20,15 +20,17 @@ jobs:
       - name: Checkout the code
         uses: actions/checkout@v2
 
+      - name: Install Poetry
+        run: pipx install poetry
+
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2.3.1
+        uses: actions/setup-python@v4.2.0
         with:
           python-version: ${{ matrix.python-version }}
+          cache: poetry
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install tox tox-gh-actions tox-poetry-dev-dependencies
+        run: poetry install
 
       - name: Test with tox
-        run: tox
+        run: poetry run tox
