@@ -24,7 +24,7 @@ classifiers = [
 Source = "https://github.com/memrise/mypy-json-report"
 
 [tool.poetry.dependencies]
-python = ">=3.7,<3.11"
+python = ">=3.7"
 
 [tool.poetry.group.test.dependencies]
 tox = "^3.24.5"
