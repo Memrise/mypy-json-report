@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Removed upper bound for Python compatibility
 - Add Python 3.11 to test matrix
 
 ## v0.1.2 [2022-01-17]
