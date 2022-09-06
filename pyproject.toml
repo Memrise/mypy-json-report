@@ -26,7 +26,7 @@ Source = "https://github.com/memrise/mypy-json-report"
 [tool.poetry.dependencies]
 python = ">=3.7"
 
-[tool.poetry.group.test.dependencies]
+[tool.poetry.group.dev.dependencies]
 tox = "^3.24.5"
 mypy = "^0.971"
 tox-gh-actions = "^2.9.1"
