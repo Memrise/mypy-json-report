@@ -1,6 +1,6 @@
 # Changelog for mypy-json-report
 
-## Unreleased
+## v0.1.3 [2022-09-07]
 
 - Removed upper bound for Python compatibility
 - Add Python 3.11 to test matrix
