@@ -29,7 +29,7 @@ def main() -> None:
     if command in ("help", "-h", "--help"):
         help()
     else:
-        print("Unexpected command:", args)
+        print("Unexpected command:", command)
         help()
         exit(1)
 
