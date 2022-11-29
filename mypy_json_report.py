@@ -24,7 +24,8 @@ def main() -> None:
 
 
 def report_errors() -> None:
-    print(produce_errors_report(sys.stdin))
+    errors = produce_errors_report(sys.stdin)
+    print(errors)
 
 
 @dataclass(frozen=True)
