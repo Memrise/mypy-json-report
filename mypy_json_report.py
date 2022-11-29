@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import json
+import pathlib
 import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
@@ -28,6 +29,11 @@ def main() -> None:
     command, *options = args
     if command in ("help", "-h", "--help"):
         help()
+    elif command == "totals":
+        if len(options) != 1:
+            print("Error: 'file' must define exactly one file path.")
+            exit(1)
+        summarize_errors(filepath=options[0])
     else:
         print("Unexpected command:", command)
         help()
@@ -45,6 +51,8 @@ COMMAND:
                         The report will be sent to stdout.
 
     help, -h, --help    Prints this help.
+
+    totals [file]       Summarizes the errors in _file_ in JSON format.
 """
 
 
@@ -58,10 +66,24 @@ def report_errors() -> None:
     print(error_json)
 
 
+def summarize_errors(*, filepath: str) -> None:
+    errors_json = pathlib.Path(filepath).read_text()
+    errors = json.loads(errors_json)
+    summary = produce_errors_summary(errors)
+    summary_json = json.dumps(summary, sort_keys=True)
+    print(summary_json)
+
+
 @dataclass(frozen=True)
 class MypyError:
     filename: str
     message: str
+
+
+def produce_errors_summary(errors: Dict[str, Dict[str, int]]) -> Dict[str, int]:
+    total_errors = sum(sum(file_errors.values()) for file_errors in errors.values())
+    files_with_errors = len(errors.keys())
+    return {"files_with_errors": files_with_errors, "total_errors": total_errors}
 
 
 def produce_errors_report(input_lines: Iterator[str]) -> Dict[str, Dict[str, int]]:

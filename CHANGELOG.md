@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Add `help` command to print out usage information.
+- Add `totals` command to quantify the errors recorded in a file.
 - Use GA version of Python 3.11 in test matrix.
 
 ## v0.1.3 [2022-09-07]
