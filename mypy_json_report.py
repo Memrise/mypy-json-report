@@ -20,7 +20,8 @@ from typing import Counter as CounterType, Dict, Iterator
 
 
 def main() -> None:
-    print(produce_errors_report(sys.stdin))
+    errors = produce_errors_report(sys.stdin)
+    print(errors)
 
 
 @dataclass(frozen=True)
