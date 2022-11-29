@@ -20,7 +20,12 @@ from typing import Counter as CounterType, Dict, Iterator
 
 
 def main() -> None:
-    report_errors()
+    args = sys.argv[1:]
+    if args == []:
+        report_errors()
+    else:
+        print("Unexpected command:", args)
+        exit(1)
 
 
 def report_errors() -> None:
