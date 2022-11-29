@@ -23,9 +23,33 @@ def main() -> None:
     args = sys.argv[1:]
     if args in ([], ["errors"]):
         report_errors()
+        return
+
+    command, *options = args
+    if command in ("help", "-h", "--help"):
+        help()
     else:
         print("Unexpected command:", args)
+        help()
         exit(1)
+
+
+_help_text = """
+Usage: mypy-json-report [COMMAND]
+
+  Generate a JSON report from your mypy output.
+
+COMMAND:
+    errors (default)    Generate a report from mypy's output.
+                        Mypy's output is accepted from stdin.
+                        The report will be sent to stdout.
+
+    help, -h, --help    Prints this help.
+"""
+
+
+def help() -> None:
+    print(_help_text)
 
 
 def report_errors() -> None:

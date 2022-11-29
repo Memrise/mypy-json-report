@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add `help` command to print out usage information.
 - Use GA version of Python 3.11 in test matrix.
 
 ## v0.1.3 [2022-09-07]
