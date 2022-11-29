@@ -10,7 +10,7 @@ mypy_json_report.py:68: error: Call to untyped function "main" in typed context
 Found 2 errors in 1 file (checked 3 source files)"""
 
 
-def test_report() -> None:
+def test_errors_report() -> None:
     report = produce_errors_report(StringIO(EXAMPLE_MYPY_STDOUT))
 
     assert report == {
