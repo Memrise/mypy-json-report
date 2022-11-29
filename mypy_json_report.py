@@ -16,8 +16,7 @@ import json
 import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from typing import Counter as CounterType
-from typing import Dict, Iterator
+from typing import Counter as CounterType, Dict, Iterator
 
 
 def main() -> None:

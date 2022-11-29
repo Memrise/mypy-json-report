@@ -3,6 +3,7 @@ from io import StringIO
 
 from mypy_json_report import produce_errors_report
 
+
 EXAMPLE_MYPY_STDOUT = """\
 mypy_json_report.py:8: error: Function is missing a return type annotation
 mypy_json_report.py:8: note: Use "-> None" if function does not return a value
