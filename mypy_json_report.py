@@ -20,6 +20,10 @@ from typing import Counter as CounterType, Dict, Iterator
 
 
 def main() -> None:
+    report_errors()
+
+
+def report_errors() -> None:
     print(produce_errors_report(sys.stdin))
 
 
