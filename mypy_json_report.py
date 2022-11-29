@@ -25,7 +25,8 @@ def main() -> None:
 
 def report_errors() -> None:
     errors = produce_errors_report(sys.stdin)
-    print(errors)
+    error_json = json.dumps(errors, sort_keys=True, indent=2)
+    print(error_json)
 
 
 @dataclass(frozen=True)
@@ -34,12 +35,12 @@ class MypyError:
     message: str
 
 
-def produce_errors_report(input_lines: Iterator[str]) -> str:
+def produce_errors_report(input_lines: Iterator[str]) -> Dict[str, Dict[str, int]]:
     """Given lines from mypy's output, return a JSON summary of error frequencies by file."""
     errors = _extract_errors(input_lines)
     error_frequencies = _count_errors(errors)
     structured_errors = _structure_errors(error_frequencies)
-    return json.dumps(structured_errors, sort_keys=True, indent=2)
+    return structured_errors
 
 
 def _extract_errors(lines: Iterator[str]) -> Iterator[MypyError]:
