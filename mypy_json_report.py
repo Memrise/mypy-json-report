@@ -21,7 +21,7 @@ from typing import Counter as CounterType, Dict, Iterator
 
 def main() -> None:
     args = sys.argv[1:]
-    if args == []:
+    if args in ([], ["errors"]):
         report_errors()
     else:
         print("Unexpected command:", args)
