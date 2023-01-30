@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 import json
 import pathlib
 import sys
@@ -19,45 +20,42 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from typing import Counter as CounterType, Dict, Iterator
 
+from typing_extensions import Protocol
+
+
+def parser_command(args: object) -> None:
+    report_errors()
+
+
+class TotalsArgs(Protocol):
+    filepath: str
+
+
+def totals_command(args: TotalsArgs) -> None:
+    summarize_errors(filepath=args.filepath)
+
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(title="command")
+    # If no command is defined, default to the parser command.
+    # This preserves legacy behavior.
+    parser.set_defaults(func=parser_command)
+
+    parse_parser = subparsers.add_parser(
+        "parse", help="Transform Mypy output into JSON."
+    )
+    parse_parser.set_defaults(func=parser_command)
+
+    totals_parser = subparsers.add_parser(
+        "totals", help="Summarizes the errors in _file_ in JSON format."
+    )
+    totals_parser.add_argument("filepath", type=pathlib.Path)
+    totals_parser.set_defaults(func=totals_command)
+
     args = sys.argv[1:]
-    if args in ([], ["errors"]):
-        report_errors()
-        return
-
-    command, *options = args
-    if command in ("help", "-h", "--help"):
-        help()
-    elif command == "totals":
-        if len(options) != 1:
-            print("Error: 'file' must define exactly one file path.")
-            exit(1)
-        summarize_errors(filepath=options[0])
-    else:
-        print("Unexpected command:", command)
-        help()
-        exit(1)
-
-
-_help_text = """
-Usage: mypy-json-report [COMMAND]
-
-  Generate a JSON report from your mypy output.
-
-COMMAND:
-    errors (default)    Generate a report from mypy's output.
-                        Mypy's output is accepted from stdin.
-                        The report will be sent to stdout.
-
-    help, -h, --help    Prints this help.
-
-    totals [file]       Summarizes the errors in _file_ in JSON format.
-"""
-
-
-def help() -> None:
-    print(_help_text)
+    parsed = parser.parse_args(args)
+    parsed.func(parsed)
 
 
 def report_errors() -> None:
