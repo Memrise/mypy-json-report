@@ -40,6 +40,13 @@ def main() -> None:
     parse_parser = subparsers.add_parser(
         "parse", help="Transform Mypy output into JSON."
     )
+    parse_parser.add_argument(
+        "-i",
+        "--indentation",
+        type=int,
+        default=2,
+        help="Number of spaces to indent JSON output.",
+    )
 
     parse_parser.set_defaults(func=_parse_command)
 
@@ -50,7 +57,7 @@ def main() -> None:
 def _parse_command(args: argparse.Namespace) -> None:
     """Handle the `parse` command."""
     errors = parse_errors_report(sys.stdin)
-    error_json = json.dumps(errors, sort_keys=True, indent=2)
+    error_json = json.dumps(errors, sort_keys=True, indent=args.indentation)
     print(error_json)
 
 

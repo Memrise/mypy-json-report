@@ -4,6 +4,7 @@
 
 - *Action required:* Move existing behaviour under "parse" subcommand.
   Invocations of `mypy-json-report` should now be replaced with `mypy-json-report parse`.
+- Add `parse --indentation` flag to grant control over how much indentation is used in the JSON report.
 - Use GA version of Python 3.11 in test matrix.
 
 ## v0.1.3 [2022-09-07]
