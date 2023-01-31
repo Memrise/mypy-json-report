@@ -72,7 +72,7 @@ class MypyError:
 
 
 def parse_errors_report(input_lines: Iterator[str]) -> Dict[str, Dict[str, int]]:
-    """Given lines from mypy's output, return a JSON summary of error frequencies by file."""
+    """Given lines from mypy's output, return a summary of error frequencies by file."""
     errors = _extract_errors(input_lines)
     error_frequencies = _count_errors(errors)
     structured_errors = _structure_errors(error_frequencies)
