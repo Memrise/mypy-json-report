@@ -38,3 +38,9 @@ mypy-json-report = "mypy_json_report:main"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+combine_as_imports = true
+known_first_party = ["mypy_json_report"]
+lines_after_imports = 2
+profile = "black"
