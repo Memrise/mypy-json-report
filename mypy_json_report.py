@@ -43,8 +43,7 @@ def main() -> None:
 
     parse_parser.set_defaults(func=_parse_command)
 
-    args = sys.argv[1:]
-    parsed = parser.parse_args(args)
+    parsed = parser.parse_args()
     parsed.func(parsed)
 
 
