@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
+import enum
 import json
 import sys
 from collections import Counter, defaultdict
@@ -19,14 +21,48 @@ from dataclasses import dataclass
 from typing import Counter as CounterType, Dict, Iterator
 
 
+class ErrorCodes(enum.IntEnum):
+    DEPRECATED = 1
+
+
 def main() -> None:
-    report_errors()
+    """
+    The primary entrypoint of the program.
+
+    Parses the CLI flags, and delegates to other functions as appropriate.
+    For details of how to invoke the program, call it with `--help`.
+    """
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(title="subcommand")
+
+    parser.set_defaults(func=_no_command)
+
+    parse_parser = subparsers.add_parser(
+        "parse", help="Transform Mypy output into JSON."
+    )
+
+    parse_parser.set_defaults(func=_parse_command)
+
+    args = sys.argv[1:]
+    parsed = parser.parse_args(args)
+    parsed.func(parsed)
 
 
-def report_errors() -> None:
+def _parse_command(args: object) -> None:
+    """Handle the `parse` command."""
     errors = parse_errors_report(sys.stdin)
     error_json = json.dumps(errors, sort_keys=True, indent=2)
     print(error_json)
+
+
+def _no_command(args: object) -> None:
+    """
+    Handle the lack of an explicit command.
+
+    This will be hit when the program is called without arguments.
+    """
+    print("A subcommand is required. Pass --help for usage info.")
+    sys.exit(ErrorCodes.DEPRECATED)
 
 
 @dataclass(frozen=True)
