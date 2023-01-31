@@ -48,14 +48,14 @@ def main() -> None:
     parsed.func(parsed)
 
 
-def _parse_command(args: object) -> None:
+def _parse_command(args: argparse.Namespace) -> None:
     """Handle the `parse` command."""
     errors = parse_errors_report(sys.stdin)
     error_json = json.dumps(errors, sort_keys=True, indent=2)
     print(error_json)
 
 
-def _no_command(args: object) -> None:
+def _no_command(args: argparse.Namespace) -> None:
     """
     Handle the lack of an explicit command.
 
