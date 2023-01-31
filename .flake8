@@ -1,0 +1,13 @@
+# This file is not used by anything in the repo.
+# It is here as a convenience to developers who use flake8 locally.
+
+[flake8]
+ignore =
+    # whitespace before ':' - conflicts with black
+    E203
+
+    # line too long - black takes care of this for us
+    E501
+
+    # line break before binary operator - this is what black does
+    W503
