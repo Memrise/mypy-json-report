@@ -3,6 +3,11 @@
 
 [flake8]
 ignore =
-    E203  # whitespace before ':' - conflicts with black
-    E501  # line too long - black takes care of this for us
-    W503  # line break before binary operator - this is what black does
+    # whitespace before ':' - conflicts with black
+    E203
+
+    # line too long - black takes care of this for us
+    E501
+
+    # line break before binary operator - this is what black does
+    W503
