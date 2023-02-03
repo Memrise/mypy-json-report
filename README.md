@@ -14,7 +14,7 @@ Pipe the output of mypy through the `mypy-json-report` CLI app.
 Store the output to a file, and commit it to your git repo.
 
 ```
-mypy . --strict | mypy-json-report > known-mypy-errors.json
+mypy . --strict | mypy-json-report parse > known-mypy-errors.json
 git add known-mypy-errors.json
 git commit -m "Add mypy errors lockfile"
 ```
@@ -80,7 +80,7 @@ jobs:
 
       - name: Run mypy
         run: |
-          mypy . --strict | mypy-json-report > known-mypy-errors.json
+          mypy . --strict | mypy-json-report parse > known-mypy-errors.json
 
       - name: Check for mypy changes
         run: |
