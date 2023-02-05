@@ -19,7 +19,7 @@ import pathlib
 import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from typing import Dict, Iterator, Optional
+from typing import Dict, Iterator
 
 
 class ErrorCodes(enum.IntEnum):
@@ -86,6 +86,10 @@ def _no_command(args: argparse.Namespace) -> None:
     sys.exit(ErrorCodes.DEPRECATED)
 
 
+class ParseError(Exception):
+    pass
+
+
 @dataclass(frozen=True)
 class MypyMessage:
     filename: str
@@ -124,18 +128,19 @@ class ErrorCounter:
 def _extract_messages(lines: Iterator[str]) -> Iterator[MypyMessage]:
     """Given lines from mypy's output, yield a series of MypyMessage objects."""
     for line in lines:
-        message = extract_message(line)
-        if message is not None:
-            yield message
+        try:
+            yield extract_message(line)
+        except ParseError:
+            continue
 
 
-def extract_message(line: str) -> Optional[MypyMessage]:
+def extract_message(line: str) -> MypyMessage:
     try:
         location, message_type, message = line.strip().split(": ", 2)
-    except ValueError:
+    except ValueError as e:
         # Expected to happen on summary lines.
         # We could avoid this by requiring --no-error-summary
-        return None
+        raise ParseError from e
     return MypyMessage(
         filename=location.split(":")[0], message=message, message_type=message_type
     )

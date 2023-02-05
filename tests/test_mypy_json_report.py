@@ -1,4 +1,6 @@
-from mypy_json_report import ErrorCounter, MypyMessage, extract_message
+import pytest
+
+from mypy_json_report import ErrorCounter, MypyMessage, ParseError, extract_message
 
 
 EXAMPLE_MYPY_STDOUT = """\
@@ -34,9 +36,8 @@ class TestExtractMessage:
     def test_summary_line(self) -> None:
         line = "Found 2 errors in 1 file (checked 3 source files)"
 
-        message = extract_message(line)
-
-        assert message is None
+        with pytest.raises(ParseError):
+            extract_message(line)
 
 
 class TestErrorCounter:
