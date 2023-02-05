@@ -102,7 +102,7 @@ def parse_errors_report(input_lines: Iterator[str]) -> Dict[str, Dict[str, int]]
             ...
         }
     """
-    errors = _extract_errors(input_lines)
+    errors = _extract_messages(input_lines)
     error_frequencies: CounterType[MypyError] = Counter(errors)
     grouped_errors: Dict[str, Dict[str, int]] = defaultdict(dict)
     for error, frequency in error_frequencies.items():
@@ -111,7 +111,7 @@ def parse_errors_report(input_lines: Iterator[str]) -> Dict[str, Dict[str, int]]
     return dict(grouped_errors)
 
 
-def _extract_errors(lines: Iterator[str]) -> Iterator[MypyError]:
+def _extract_messages(lines: Iterator[str]) -> Iterator[MypyError]:
     """Given lines from mypy's output, yield a series of MypyError objects."""
     for line in lines:
         try:
