@@ -94,11 +94,11 @@ def parse_errors_report(input_lines: Iterator[str]) -> Dict[str, Dict[str, int]]
     The resulting structure looks like this:
 
         {
-            "module/filename.py": [
+            "module/filename.py": {
                 "Mypy error message": 42,
                 "Another error message": 19,
                 ...
-            ],
+            },
             ...
         }
     """
