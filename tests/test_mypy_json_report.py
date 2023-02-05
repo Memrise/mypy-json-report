@@ -1,6 +1,6 @@
 import pytest
 
-from mypy_json_report import ErrorCounter, MypyMessage, ParseError, extract_message
+from mypy_json_report import ErrorCounter, MypyMessage, ParseError
 
 
 EXAMPLE_MYPY_STDOUT = """\
@@ -10,11 +10,11 @@ mypy_json_report.py:68: error: Call to untyped function "main" in typed context
 Found 2 errors in 1 file (checked 3 source files)"""
 
 
-class TestExtractMessage:
+class TestMypyMessageFromLine:
     def test_error(self) -> None:
         line = "test.py:8: error: Function is missing a return type annotation"
 
-        message = extract_message(line)
+        message = MypyMessage.from_line(line)
 
         assert message == MypyMessage(
             filename="test.py",
@@ -25,7 +25,7 @@ class TestExtractMessage:
     def test_note(self) -> None:
         line = 'test.py:8: note: Use "-> None" if function does not return a value'
 
-        message = extract_message(line)
+        message = MypyMessage.from_line(line)
 
         assert message == MypyMessage(
             filename="test.py",
@@ -37,7 +37,7 @@ class TestExtractMessage:
         line = "Found 2 errors in 1 file (checked 3 source files)"
 
         with pytest.raises(ParseError):
-            extract_message(line)
+            MypyMessage.from_line(line)
 
 
 class TestErrorCounter:

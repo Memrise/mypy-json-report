@@ -96,6 +96,20 @@ class MypyMessage:
     message: str
     message_type: str
 
+    @classmethod
+    def from_line(cls, line: str) -> "MypyMessage":
+        try:
+            location, message_type, message = line.strip().split(": ", 2)
+        except ValueError as e:
+            # Expected to happen on summary lines.
+            # We could avoid this by requiring --no-error-summary
+            raise ParseError from e
+        return MypyMessage(
+            filename=location.split(":")[0],
+            message=message,
+            message_type=message_type,
+        )
+
 
 ErrorSummary = Dict[str, Dict[str, int]]
 
@@ -129,21 +143,9 @@ def _extract_messages(lines: Iterator[str]) -> Iterator[MypyMessage]:
     """Given lines from mypy's output, yield a series of MypyMessage objects."""
     for line in lines:
         try:
-            yield extract_message(line)
+            yield MypyMessage.from_line(line)
         except ParseError:
             continue
-
-
-def extract_message(line: str) -> MypyMessage:
-    try:
-        location, message_type, message = line.strip().split(": ", 2)
-    except ValueError as e:
-        # Expected to happen on summary lines.
-        # We could avoid this by requiring --no-error-summary
-        raise ParseError from e
-    return MypyMessage(
-        filename=location.split(":")[0], message=message, message_type=message_type
-    )
 
 
 if __name__ == "__main__":
