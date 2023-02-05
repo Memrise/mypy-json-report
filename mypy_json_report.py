@@ -19,7 +19,7 @@ import pathlib
 import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from typing import Dict, Iterator
+from typing import Dict, Iterator, Optional
 
 
 class ErrorCodes(enum.IntEnum):
@@ -107,7 +107,6 @@ class ErrorCounter:
 
     def __init__(self) -> None:
         self.grouped_errors: Dict[str, Dict[str, int]] = defaultdict(Counter)
-
     def parse_errors_report(self, input_lines: Iterator[str]) -> None:
         """
         Given lines from mypy's output, update the summary of error frequencies.
@@ -120,15 +119,21 @@ class ErrorCounter:
 def _extract_messages(lines: Iterator[str]) -> Iterator[MypyMessage]:
     """Given lines from mypy's output, yield a series of MypyMessage objects."""
     for line in lines:
-        try:
-            location, message_type, message = line.strip().split(": ", 2)
-        except ValueError:
-            # Expected to happen on summary lines.
-            # We could avoid this by requiring --no-error-summary
-            continue
-        if message_type != "error":
-            continue
-        yield MypyMessage(filename=location.split(":")[0], message=message)
+        message = extract_message(line)
+        if message is not None:
+            yield message
+
+
+def extract_message(line: str) -> Optional[MypyMessage]:
+    try:
+        location, message_type, message = line.strip().split(": ", 2)
+    except ValueError:
+        # Expected to happen on summary lines.
+        # We could avoid this by requiring --no-error-summary
+        return None
+    if message_type != "error":
+        return None
+    return MypyMessage(filename=location.split(":")[0], message=message)
 
 
 if __name__ == "__main__":
