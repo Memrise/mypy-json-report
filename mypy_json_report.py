@@ -93,8 +93,10 @@ class ParseError(Exception):
 @dataclass(frozen=True)
 class MypyMessage:
     filename: str
+    line_number: int
     message: str
     message_type: str
+    raw: str
 
     @classmethod
     def from_line(cls, line: str) -> "MypyMessage":
@@ -104,10 +106,20 @@ class MypyMessage:
             # Expected to happen on summary lines.
             # We could avoid this by requiring --no-error-summary
             raise ParseError from e
+        elements = location.split(":")
+        num_elements = len(elements)
+        if num_elements == 2:
+            filename, line_number = elements
+        elif num_elements == 3:
+            filename, line_number, _ = elements
+        else:
+            raise ParseError(f"Don't know how to parse: {location}")
         return MypyMessage(
-            filename=location.split(":")[0],
+            filename=filename,
+            line_number=int(line_number),
             message=message,
             message_type=message_type,
+            raw=line,
         )
 
 

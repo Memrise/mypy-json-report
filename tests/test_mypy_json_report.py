@@ -18,8 +18,10 @@ class TestMypyMessageFromLine:
 
         assert message == MypyMessage(
             filename="test.py",
+            line_number=8,
             message="Function is missing a return type annotation",
             message_type="error",
+            raw=line,
         )
 
     def test_note(self) -> None:
@@ -29,8 +31,23 @@ class TestMypyMessageFromLine:
 
         assert message == MypyMessage(
             filename="test.py",
+            line_number=8,
             message='Use "-> None" if function does not return a value',
             message_type="note",
+            raw=line,
+        )
+
+    def test_line_with_column(self) -> None:
+        line = 'test.py:88:16: error: Item "None" of "Optional[Dict[str, Any]]" has no attribute "get"  [union-attr]\n'
+
+        message = MypyMessage.from_line(line)
+
+        assert message == MypyMessage(
+            filename="test.py",
+            line_number=88,
+            message='Item "None" of "Optional[Dict[str, Any]]" has no attribute "get"  [union-attr]',
+            message_type="error",
+            raw='test.py:88:16: error: Item "None" of "Optional[Dict[str, Any]]" has no attribute "get"  [union-attr]',
         )
 
     def test_summary_line(self) -> None:
