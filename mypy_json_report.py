@@ -19,7 +19,7 @@ import pathlib
 import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from typing import Counter as CounterType, Dict, Iterator
+from typing import Dict, Iterator
 
 
 class ErrorCodes(enum.IntEnum):
@@ -64,7 +64,8 @@ def main() -> None:
 def _parse_command(args: argparse.Namespace) -> None:
     """Handle the `parse` command."""
     error_counter = ErrorCounter()
-    errors = error_counter.parse_errors_report(sys.stdin)
+    error_counter.parse_errors_report(sys.stdin)
+    errors = error_counter.grouped_errors
     error_json = json.dumps(errors, sort_keys=True, indent=args.indentation)
     if args.output_file:
         args.output_file.write_text(error_json + "\n")
@@ -91,9 +92,9 @@ class MypyMessage:
 class ErrorCounter:
     """Produces a summary of errors in a Mypy report."""
 
-    def parse_errors_report(
-        self, input_lines: Iterator[str]
-    ) -> Dict[str, Dict[str, int]]:
+    grouped_errors: Dict[str, Dict[str, int]]
+
+    def parse_errors_report(self, input_lines: Iterator[str]) -> None:
         """
         Given lines from mypy's output, return a summary of error frequencies by file.
 
@@ -109,11 +110,9 @@ class ErrorCounter:
             }
         """
         messages = _extract_messages(input_lines)
-        grouped_errors: Dict[str, CounterType[str]] = defaultdict(Counter)
+        self.grouped_errors = defaultdict(Counter)
         for error in messages:
-            grouped_errors[error.filename][error.message] += 1
-
-        return dict(grouped_errors)
+            self.grouped_errors[error.filename][error.message] += 1
 
 
 def _extract_messages(lines: Iterator[str]) -> Iterator[MypyMessage]:

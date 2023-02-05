@@ -12,7 +12,8 @@ Found 2 errors in 1 file (checked 3 source files)"""
 
 def test_parse_errors_report() -> None:
     error_counter = ErrorCounter()
-    report = error_counter.parse_errors_report(StringIO(EXAMPLE_MYPY_STDOUT))
+    error_counter.parse_errors_report(StringIO(EXAMPLE_MYPY_STDOUT))
+    report = error_counter.grouped_errors
 
     assert report == {
         "mypy_json_report.py": {
