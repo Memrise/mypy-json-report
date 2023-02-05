@@ -63,7 +63,8 @@ def main() -> None:
 
 def _parse_command(args: argparse.Namespace) -> None:
     """Handle the `parse` command."""
-    errors = parse_errors_report(sys.stdin)
+    error_counter = ErrorCounter()
+    errors = error_counter.parse_errors_report(sys.stdin)
     error_json = json.dumps(errors, sort_keys=True, indent=args.indentation)
     if args.output_file:
         args.output_file.write_text(error_json + "\n")
@@ -87,27 +88,32 @@ class MypyMessage:
     message: str
 
 
-def parse_errors_report(input_lines: Iterator[str]) -> Dict[str, Dict[str, int]]:
-    """
-    Given lines from mypy's output, return a summary of error frequencies by file.
+class ErrorCounter:
+    """Produces a summary of errors in a Mypy report."""
 
-    The resulting structure looks like this:
+    def parse_errors_report(
+        self, input_lines: Iterator[str]
+    ) -> Dict[str, Dict[str, int]]:
+        """
+        Given lines from mypy's output, return a summary of error frequencies by file.
 
-        {
-            "module/filename.py": {
-                "Mypy error message": 42,
-                "Another error message": 19,
+        The resulting structure looks like this:
+
+            {
+                "module/filename.py": {
+                    "Mypy error message": 42,
+                    "Another error message": 19,
+                    ...
+                },
                 ...
-            },
-            ...
-        }
-    """
-    messages = _extract_messages(input_lines)
-    grouped_errors: Dict[str, CounterType[str]] = defaultdict(Counter)
-    for error in messages:
-        grouped_errors[error.filename][error.message] += 1
+            }
+        """
+        messages = _extract_messages(input_lines)
+        grouped_errors: Dict[str, CounterType[str]] = defaultdict(Counter)
+        for error in messages:
+            grouped_errors[error.filename][error.message] += 1
 
-    return dict(grouped_errors)
+        return dict(grouped_errors)
 
 
 def _extract_messages(lines: Iterator[str]) -> Iterator[MypyMessage]:

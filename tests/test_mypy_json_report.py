@@ -1,6 +1,6 @@
 from io import StringIO
 
-from mypy_json_report import parse_errors_report
+from mypy_json_report import ErrorCounter
 
 
 EXAMPLE_MYPY_STDOUT = """\
@@ -11,7 +11,8 @@ Found 2 errors in 1 file (checked 3 source files)"""
 
 
 def test_parse_errors_report() -> None:
-    report = parse_errors_report(StringIO(EXAMPLE_MYPY_STDOUT))
+    error_counter = ErrorCounter()
+    report = error_counter.parse_errors_report(StringIO(EXAMPLE_MYPY_STDOUT))
 
     assert report == {
         "mypy_json_report.py": {
