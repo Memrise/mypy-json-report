@@ -43,11 +43,7 @@ class TestMypyMessageFromLine:
 class TestErrorCounter:
     def test_new_unseen_error(self) -> None:
         error_counter = ErrorCounter()
-        message = MypyMessage(
-            filename="file.py",
-            message="An example type error",
-            message_type="error",
-        )
+        message = MypyMessage.from_line("file.py:8: error: An example type error")
 
         error_counter.process_message(message)
 
@@ -57,11 +53,7 @@ class TestErrorCounter:
 
     def test_errors_counted(self) -> None:
         error_counter = ErrorCounter()
-        message = MypyMessage(
-            filename="file.py",
-            message="An example type error",
-            message_type="error",
-        )
+        message = MypyMessage.from_line("file.py:8: error: An example type error")
 
         error_counter.process_message(message)
         error_counter.process_message(message)
@@ -72,11 +64,7 @@ class TestErrorCounter:
 
     def test_notes_uncounted(self) -> None:
         error_counter = ErrorCounter()
-        message = MypyMessage(
-            filename="file.py",
-            message="An example note",
-            message_type="note",
-        )
+        message = MypyMessage.from_line("file.py:8: note: An example note")
 
         error_counter.process_message(message)
 
