@@ -64,7 +64,10 @@ def main() -> None:
 def _parse_command(args: argparse.Namespace) -> None:
     """Handle the `parse` command."""
     error_counter = ErrorCounter()
-    error_counter.parse_errors_report(sys.stdin)
+    messages = _extract_messages(sys.stdin)
+    for message in messages:
+        error_counter.process_message(message)
+
     errors = error_counter.grouped_errors
     error_json = json.dumps(errors, sort_keys=True, indent=args.indentation)
     if args.output_file:
@@ -108,13 +111,6 @@ class ErrorCounter:
 
     def __init__(self) -> None:
         self.grouped_errors: Dict[str, Dict[str, int]] = defaultdict(Counter)
-    def parse_errors_report(self, input_lines: Iterator[str]) -> None:
-        """
-        Given lines from mypy's output, update the summary of error frequencies.
-        """
-        messages = _extract_messages(input_lines)
-        for message in messages:
-            self.process_message(message)
 
     def process_message(self, message: MypyMessage) -> None:
         self.grouped_errors[message.filename][message.message] += 1

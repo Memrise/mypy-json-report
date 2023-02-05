@@ -1,5 +1,3 @@
-from io import StringIO
-
 from mypy_json_report import ErrorCounter, MypyMessage, extract_message
 
 
@@ -35,19 +33,6 @@ class TestExtractMessage:
         message = extract_message(line)
 
         assert message is None
-
-
-def test_parse_errors_report() -> None:
-    error_counter = ErrorCounter()
-    error_counter.parse_errors_report(StringIO(EXAMPLE_MYPY_STDOUT))
-    report = error_counter.grouped_errors
-
-    assert report == {
-        "mypy_json_report.py": {
-            'Call to untyped function "main" in typed context': 1,
-            "Function is missing a return type annotation": 1,
-        }
-    }
 
 
 class TestErrorCounter:
