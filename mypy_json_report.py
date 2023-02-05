@@ -104,8 +104,11 @@ def parse_errors_report(input_lines: Iterator[str]) -> Dict[str, Dict[str, int]]
     """
     errors = _extract_errors(input_lines)
     error_frequencies: CounterType[MypyError] = Counter(errors)
-    structured_errors = _structure_errors(error_frequencies)
-    return structured_errors
+    grouped_errors: Dict[str, Dict[str, int]] = defaultdict(dict)
+    for error, frequency in error_frequencies.items():
+        grouped_errors[error.filename][error.message] = frequency
+
+    return dict(grouped_errors)
 
 
 def _extract_errors(lines: Iterator[str]) -> Iterator[MypyError]:
@@ -120,17 +123,6 @@ def _extract_errors(lines: Iterator[str]) -> Iterator[MypyError]:
         if message_type != "error":
             continue
         yield MypyError(filename=location.split(":")[0], message=message)
-
-
-def _structure_errors(errors: CounterType[MypyError]) -> Dict[str, Dict[str, int]]:
-    """
-    Produce a structure to hold the mypy errors.
-    """
-    grouped_errors: Dict[str, Dict[str, int]] = defaultdict(dict)
-    for error, frequency in errors.items():
-        grouped_errors[error.filename][error.message] = frequency
-
-    return dict(grouped_errors)
 
 
 if __name__ == "__main__":
