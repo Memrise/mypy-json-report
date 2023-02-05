@@ -87,6 +87,7 @@ def _no_command(args: argparse.Namespace) -> None:
 class MypyMessage:
     filename: str
     message: str
+    message_type: str
 
 
 class ErrorCounter:
@@ -133,7 +134,9 @@ def extract_message(line: str) -> Optional[MypyMessage]:
         return None
     if message_type != "error":
         return None
-    return MypyMessage(filename=location.split(":")[0], message=message)
+    return MypyMessage(
+        filename=location.split(":")[0], message=message, message_type=message_type
+    )
 
 
 if __name__ == "__main__":

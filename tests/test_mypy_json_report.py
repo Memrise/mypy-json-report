@@ -17,7 +17,9 @@ class TestExtractMessage:
         message = extract_message(line)
 
         assert message == MypyMessage(
-            filename="test.py", message="Function is missing a return type annotation"
+            filename="test.py",
+            message="Function is missing a return type annotation",
+            message_type="error",
         )
 
     def test_note(self) -> None:
