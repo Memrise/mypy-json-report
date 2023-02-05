@@ -93,6 +93,9 @@ class MypyMessage:
     message_type: str
 
 
+ErrorSummary = Dict[str, Dict[str, int]]
+
+
 class ErrorCounter:
     """
     Produces a summary of errors in a Mypy report.
@@ -110,7 +113,7 @@ class ErrorCounter:
     """
 
     def __init__(self) -> None:
-        self.grouped_errors: Dict[str, Dict[str, int]] = defaultdict(Counter)
+        self.grouped_errors: ErrorSummary = defaultdict(Counter)
 
     def process_message(self, message: MypyMessage) -> None:
         if message.message_type != "error":
