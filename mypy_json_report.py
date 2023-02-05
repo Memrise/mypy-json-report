@@ -112,8 +112,8 @@ class ErrorCounter:
         Given lines from mypy's output, update the summary of error frequencies.
         """
         messages = _extract_messages(input_lines)
-        for error in messages:
-            self.grouped_errors[error.filename][error.message] += 1
+        for message in messages:
+            self.grouped_errors[message.filename][message.message] += 1
 
 
 def _extract_messages(lines: Iterator[str]) -> Iterator[MypyMessage]:
