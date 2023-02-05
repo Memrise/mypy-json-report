@@ -82,7 +82,7 @@ def _no_command(args: argparse.Namespace) -> None:
 
 
 @dataclass(frozen=True)
-class MypyError:
+class MypyMessage:
     filename: str
     message: str
 
@@ -103,7 +103,7 @@ def parse_errors_report(input_lines: Iterator[str]) -> Dict[str, Dict[str, int]]
         }
     """
     messages = _extract_messages(input_lines)
-    error_frequencies: CounterType[MypyError] = Counter(messages)
+    error_frequencies: CounterType[MypyMessage] = Counter(messages)
     grouped_errors: Dict[str, Dict[str, int]] = defaultdict(dict)
     for error, frequency in error_frequencies.items():
         grouped_errors[error.filename][error.message] = frequency
@@ -111,8 +111,8 @@ def parse_errors_report(input_lines: Iterator[str]) -> Dict[str, Dict[str, int]]
     return dict(grouped_errors)
 
 
-def _extract_messages(lines: Iterator[str]) -> Iterator[MypyError]:
-    """Given lines from mypy's output, yield a series of MypyError objects."""
+def _extract_messages(lines: Iterator[str]) -> Iterator[MypyMessage]:
+    """Given lines from mypy's output, yield a series of MypyMessage objects."""
     for line in lines:
         try:
             location, message_type, message = line.strip().split(": ", 2)
@@ -122,7 +122,7 @@ def _extract_messages(lines: Iterator[str]) -> Iterator[MypyError]:
             continue
         if message_type != "error":
             continue
-        yield MypyError(filename=location.split(":")[0], message=message)
+        yield MypyMessage(filename=location.split(":")[0], message=message)
 
 
 if __name__ == "__main__":
