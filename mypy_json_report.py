@@ -90,24 +90,26 @@ class MypyMessage:
 
 
 class ErrorCounter:
-    """Produces a summary of errors in a Mypy report."""
+    """
+    Produces a summary of errors in a Mypy report.
+
+    The structure of grouped_errors looks like this once processing is complete:
+
+        {
+            "module/filename.py": {
+                "Mypy error message": 42,
+                "Another error message": 19,
+                ...
+            },
+            ...
+        }
+    """
 
     grouped_errors: Dict[str, Dict[str, int]]
 
     def parse_errors_report(self, input_lines: Iterator[str]) -> None:
         """
-        Given lines from mypy's output, return a summary of error frequencies by file.
-
-        The resulting structure looks like this:
-
-            {
-                "module/filename.py": {
-                    "Mypy error message": 42,
-                    "Another error message": 19,
-                    ...
-                },
-                ...
-            }
+        Given lines from mypy's output, update the summary of error frequencies.
         """
         messages = _extract_messages(input_lines)
         self.grouped_errors = defaultdict(Counter)
