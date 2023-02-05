@@ -103,7 +103,7 @@ def parse_errors_report(input_lines: Iterator[str]) -> Dict[str, Dict[str, int]]
         }
     """
     errors = _extract_errors(input_lines)
-    error_frequencies = _count_errors(errors)
+    error_frequencies: CounterType[MypyError] = Counter(errors)
     structured_errors = _structure_errors(error_frequencies)
     return structured_errors
 
@@ -120,11 +120,6 @@ def _extract_errors(lines: Iterator[str]) -> Iterator[MypyError]:
         if message_type != "error":
             continue
         yield MypyError(filename=location.split(":")[0], message=message)
-
-
-def _count_errors(errors: Iterator[MypyError]) -> CounterType[MypyError]:
-    """Count and deduplicate MypyError objects."""
-    return Counter(errors)
 
 
 def _structure_errors(errors: CounterType[MypyError]) -> Dict[str, Dict[str, int]]:
