@@ -105,14 +105,14 @@ class ErrorCounter:
         }
     """
 
-    grouped_errors: Dict[str, Dict[str, int]]
+    def __init__(self) -> None:
+        self.grouped_errors: Dict[str, Dict[str, int]] = defaultdict(Counter)
 
     def parse_errors_report(self, input_lines: Iterator[str]) -> None:
         """
         Given lines from mypy's output, update the summary of error frequencies.
         """
         messages = _extract_messages(input_lines)
-        self.grouped_errors = defaultdict(Counter)
         for error in messages:
             self.grouped_errors[error.filename][error.message] += 1
 
