@@ -102,8 +102,8 @@ def parse_errors_report(input_lines: Iterator[str]) -> Dict[str, Dict[str, int]]
             ...
         }
     """
-    errors = _extract_messages(input_lines)
-    error_frequencies: CounterType[MypyError] = Counter(errors)
+    messages = _extract_messages(input_lines)
+    error_frequencies: CounterType[MypyError] = Counter(messages)
     grouped_errors: Dict[str, Dict[str, int]] = defaultdict(dict)
     for error, frequency in error_frequencies.items():
         grouped_errors[error.filename][error.message] = frequency
