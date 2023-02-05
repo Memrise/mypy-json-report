@@ -113,6 +113,8 @@ class ErrorCounter:
         self.grouped_errors: Dict[str, Dict[str, int]] = defaultdict(Counter)
 
     def process_message(self, message: MypyMessage) -> None:
+        if message.message_type != "error":
+            return None
         self.grouped_errors[message.filename][message.message] += 1
 
 
@@ -130,8 +132,6 @@ def extract_message(line: str) -> Optional[MypyMessage]:
     except ValueError:
         # Expected to happen on summary lines.
         # We could avoid this by requiring --no-error-summary
-        return None
-    if message_type != "error":
         return None
     return MypyMessage(
         filename=location.split(":")[0], message=message, message_type=message_type

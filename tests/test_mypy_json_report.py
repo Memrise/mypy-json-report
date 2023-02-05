@@ -25,7 +25,11 @@ class TestExtractMessage:
 
         message = extract_message(line)
 
-        assert message is None
+        assert message == MypyMessage(
+            filename="test.py",
+            message='Use "-> None" if function does not return a value',
+            message_type="note",
+        )
 
     def test_summary_line(self) -> None:
         line = "Found 2 errors in 1 file (checked 3 source files)"
@@ -64,3 +68,16 @@ class TestErrorCounter:
         assert error_counter.grouped_errors == {
             "file.py": {"An example type error": 2},
         }
+
+    def test_notes_uncounted(self) -> None:
+        error_counter = ErrorCounter()
+        message = MypyMessage(
+            filename="file.py",
+            message="An example note",
+            message_type="note",
+        )
+
+        error_counter.process_message(message)
+
+        # The note was not added to the grouped_errors.
+        assert error_counter.grouped_errors == {}
