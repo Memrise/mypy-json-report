@@ -88,7 +88,20 @@ class MypyError:
 
 
 def parse_errors_report(input_lines: Iterator[str]) -> Dict[str, Dict[str, int]]:
-    """Given lines from mypy's output, return a summary of error frequencies by file."""
+    """
+    Given lines from mypy's output, return a summary of error frequencies by file.
+
+    The resulting structure looks like this:
+
+        {
+            "module/filename.py": [
+                "Mypy error message": 42,
+                "Another error message": 19,
+                ...
+            ],
+            ...
+        }
+    """
     errors = _extract_errors(input_lines)
     error_frequencies = _count_errors(errors)
     structured_errors = _structure_errors(error_frequencies)
@@ -117,17 +130,6 @@ def _count_errors(errors: Iterator[MypyError]) -> CounterType[MypyError]:
 def _structure_errors(errors: CounterType[MypyError]) -> Dict[str, Dict[str, int]]:
     """
     Produce a structure to hold the mypy errors.
-
-    The resulting structure looks like this:
-
-        {
-            "module/filename.py": [
-                "Mypy error message": 42,
-                "Another error message": 19,
-                ...
-            ],
-            ...
-        }
     """
     grouped_errors: Dict[str, Dict[str, int]] = defaultdict(dict)
     for error, frequency in errors.items():
