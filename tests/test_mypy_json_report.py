@@ -48,3 +48,34 @@ def test_parse_errors_report() -> None:
             "Function is missing a return type annotation": 1,
         }
     }
+
+
+class TestErrorCounter:
+    def test_new_unseen_error(self) -> None:
+        error_counter = ErrorCounter()
+        message = MypyMessage(
+            filename="file.py",
+            message="An example type error",
+            message_type="error",
+        )
+
+        error_counter.process_message(message)
+
+        assert error_counter.grouped_errors == {
+            "file.py": {"An example type error": 1},
+        }
+
+    def test_errors_counted(self) -> None:
+        error_counter = ErrorCounter()
+        message = MypyMessage(
+            filename="file.py",
+            message="An example type error",
+            message_type="error",
+        )
+
+        error_counter.process_message(message)
+        error_counter.process_message(message)
+
+        assert error_counter.grouped_errors == {
+            "file.py": {"An example type error": 2},
+        }

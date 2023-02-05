@@ -114,7 +114,10 @@ class ErrorCounter:
         """
         messages = _extract_messages(input_lines)
         for message in messages:
-            self.grouped_errors[message.filename][message.message] += 1
+            self.process_message(message)
+
+    def process_message(self, message: MypyMessage) -> None:
+        self.grouped_errors[message.filename][message.message] += 1
 
 
 def _extract_messages(lines: Iterator[str]) -> Iterator[MypyMessage]:
