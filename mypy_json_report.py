@@ -17,9 +17,10 @@ import enum
 import json
 import pathlib
 import sys
+import textwrap
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from typing import Counter as CounterType, Dict, Iterator, List, Optional, Tuple
+from typing import Counter as CounterType, Dict, Iterator, List, Optional, Tuple, Union
 
 
 class ErrorCodes(enum.IntEnum):
@@ -54,6 +55,22 @@ def main() -> None:
         type=pathlib.Path,
         help="The file to write the JSON report to. If omitted, the report will be written to STDOUT.",
     )
+    parse_parser.add_argument(
+        "-d",
+        "--diff-old-report",
+        default=None,
+        type=pathlib.Path,
+        help=textwrap.dedent(
+            f"""\
+            An old report to compare against. We will compare the errors in there to the new report.
+            Fail with return code {ErrorCodes.ERROR_DIFF} if we discover any new errors.
+            New errors will be printed to strerr.
+            Similar errors from the same file will also be printed
+            (because we don't know which error is the new one).
+            For completeness other hints and errors on the same lines are also printed.
+            """
+        ),
+    )
 
     parse_parser.set_defaults(func=_parse_command)
 
@@ -64,18 +81,40 @@ def main() -> None:
 def _parse_command(args: argparse.Namespace) -> None:
     """Handle the `parse` command."""
     error_counter = ErrorCounter()
-    processors = [error_counter]
+    processors: List[Union[ErrorCounter, ChangeTracker]] = [error_counter]
+
+    # If we have access to an old report, add the ChangeTracker processor.
+    tracker = None
+    if args.diff_old_report:
+        with args.diff_old_report.open() as old_report_file:
+            old_report = json.load(old_report_file)
+        tracker = ChangeTracker(old_report)
+        processors.append(tracker)
+
     messages = _extract_messages(sys.stdin)
     for message in messages:
+        # Send each line of the Mypy report to each processor.
         for processor in processors:
             processor.process_message(message)
 
+    # Print the JSON report to file or STDOUT.
     errors = error_counter.grouped_errors
     error_json = json.dumps(errors, sort_keys=True, indent=args.indentation)
     if args.output_file:
         args.output_file.write_text(error_json + "\n")
     else:
         print(error_json)
+
+    if tracker is None:
+        return
+
+    # Print the changes since the last report to STDERR.
+    diff = tracker.diff_report()
+    new_errors = "\n".join(diff.error_lines)
+    print(new_errors, file=sys.stderr)
+    print(f"Fixed errors: {diff.num_fixed_errors}", file=sys.stderr)
+    print(f"New errors: {diff.num_new_errors}", file=sys.stderr)
+    print(f"Total errors: {diff.total_errors}", file=sys.stderr)
 
 
 def _no_command(args: argparse.Namespace) -> None:
