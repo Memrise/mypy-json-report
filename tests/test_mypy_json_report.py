@@ -1,6 +1,12 @@
 import pytest
 
-from mypy_json_report import ErrorCounter, MypyMessage, ParseError
+from mypy_json_report import (
+    ChangeTracker,
+    DiffReport,
+    ErrorCounter,
+    MypyMessage,
+    ParseError,
+)
 
 
 EXAMPLE_MYPY_STDOUT = """\
@@ -87,3 +93,120 @@ class TestErrorCounter:
 
         # The note was not added to the grouped_errors.
         assert error_counter.grouped_errors == {}
+
+
+class TestChangeTracker:
+    def test_no_errors(self) -> None:
+        tracker = ChangeTracker(summary={})
+
+        report = tracker.diff_report()
+
+        assert report == DiffReport(
+            error_lines=(), total_errors=0, num_new_errors=0, num_fixed_errors=0
+        )
+
+    def test_new_error(self) -> None:
+        tracker = ChangeTracker(summary={})
+        tracker.process_message(
+            MypyMessage.from_line("file.py:8: error: An example type error")
+        )
+
+        report = tracker.diff_report()
+
+        assert report == DiffReport(
+            error_lines=("file.py:8: error: An example type error",),
+            total_errors=1,
+            num_new_errors=1,
+            num_fixed_errors=0,
+        )
+
+    def test_known_error(self) -> None:
+        tracker = ChangeTracker(summary={"file.py": {"An example type error": 1}})
+        tracker.process_message(
+            MypyMessage.from_line("file.py:8: error: An example type error")
+        )
+
+        report = tracker.diff_report()
+
+        assert report == DiffReport(
+            error_lines=(), total_errors=1, num_new_errors=0, num_fixed_errors=0
+        )
+
+    def test_fixed_error(self) -> None:
+        tracker = ChangeTracker(summary={"file.py": {"An example type error": 2}})
+        tracker.process_message(
+            MypyMessage.from_line("file.py:8: error: An example type error")
+        )
+
+        report = tracker.diff_report()
+
+        assert report == DiffReport(
+            error_lines=(),
+            total_errors=1,
+            num_new_errors=0,
+            num_fixed_errors=1,
+        )
+
+    def test_more_errors_of_same_type(self) -> None:
+        tracker = ChangeTracker(summary={"file.py": {"An example type error": 1}})
+        tracker.process_message(
+            MypyMessage.from_line("file.py:1: error: An example type error")
+        )
+        tracker.process_message(
+            MypyMessage.from_line("file.py:2: error: An example type error")
+        )
+        tracker.process_message(
+            MypyMessage.from_line("file.py:3: error: An example type error")
+        )
+
+        report = tracker.diff_report()
+
+        assert report == DiffReport(
+            error_lines=(
+                "file.py:1: error: An example type error",
+                "file.py:2: error: An example type error",
+                "file.py:3: error: An example type error",
+            ),
+            total_errors=3,
+            num_new_errors=2,
+            num_fixed_errors=0,
+        )
+
+    def test_note_on_same_line(self) -> None:
+        tracker = ChangeTracker(summary={})
+        tracker.process_message(
+            MypyMessage.from_line("file.py:1: error: An example type error")
+        )
+        tracker.process_message(
+            MypyMessage.from_line("file.py:1: note: An example note")
+        )
+
+        report = tracker.diff_report()
+
+        assert report == DiffReport(
+            error_lines=(
+                "file.py:1: error: An example type error",
+                "file.py:1: note: An example note",
+            ),
+            total_errors=1,
+            num_new_errors=1,
+            num_fixed_errors=0,
+        )
+
+    def test_error_in_new_file(self) -> None:
+        tracker = ChangeTracker(summary={"file.py": {"An example type error": 1}})
+        tracker.process_message(
+            MypyMessage.from_line("file.py:1: error: An example type error")
+        )
+        tracker.process_message(
+            MypyMessage.from_line("other.py:1: error: An example type error")
+        )
+
+        report = tracker.diff_report()
+
+        assert report == DiffReport(
+            error_lines=("other.py:1: error: An example type error",),
+            total_errors=2,
+            num_new_errors=1,
+            num_fixed_errors=0,
+        )
