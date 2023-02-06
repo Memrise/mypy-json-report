@@ -64,9 +64,11 @@ def main() -> None:
 def _parse_command(args: argparse.Namespace) -> None:
     """Handle the `parse` command."""
     error_counter = ErrorCounter()
+    processors = [error_counter]
     messages = _extract_messages(sys.stdin)
     for message in messages:
-        error_counter.process_message(message)
+        for processor in processors:
+            processor.process_message(message)
 
     errors = error_counter.grouped_errors
     error_json = json.dumps(errors, sort_keys=True, indent=args.indentation)
