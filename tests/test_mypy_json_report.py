@@ -18,7 +18,7 @@ Found 2 errors in 1 file (checked 3 source files)"""
 
 class TestMypyMessageFromLine:
     def test_error(self) -> None:
-        line = "test.py:8: error: Function is missing a return type annotation"
+        line = "test.py:8: error: Function is missing a return type annotation\n"
 
         message = MypyMessage.from_line(line)
 
@@ -27,11 +27,11 @@ class TestMypyMessageFromLine:
             line_number=8,
             message="Function is missing a return type annotation",
             message_type="error",
-            raw=line,
+            raw="test.py:8: error: Function is missing a return type annotation",
         )
 
     def test_note(self) -> None:
-        line = 'test.py:8: note: Use "-> None" if function does not return a value'
+        line = 'test.py:8: note: Use "-> None" if function does not return a value\n'
 
         message = MypyMessage.from_line(line)
 
@@ -40,7 +40,7 @@ class TestMypyMessageFromLine:
             line_number=8,
             message='Use "-> None" if function does not return a value',
             message_type="note",
-            raw=line,
+            raw='test.py:8: note: Use "-> None" if function does not return a value',
         )
 
     def test_line_with_column(self) -> None:
@@ -57,7 +57,7 @@ class TestMypyMessageFromLine:
         )
 
     def test_summary_line(self) -> None:
-        line = "Found 2 errors in 1 file (checked 3 source files)"
+        line = "Found 2 errors in 1 file (checked 3 source files)\n"
 
         with pytest.raises(ParseError):
             MypyMessage.from_line(line)

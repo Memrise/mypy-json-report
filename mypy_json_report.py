@@ -165,7 +165,7 @@ class MypyMessage:
             line_number=int(line_number),
             message=message,
             message_type=message_type,
-            raw=line,
+            raw=line.rstrip(),
         )
 
 
