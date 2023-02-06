@@ -25,6 +25,8 @@ from typing import Counter as CounterType, Dict, Iterator, List, Optional, Tuple
 
 class ErrorCodes(enum.IntEnum):
     DEPRECATED = 1
+    # Argparse returns 2 when bad args are passed.
+    ERROR_DIFF = 3
 
 
 def main() -> None:
@@ -115,6 +117,9 @@ def _parse_command(args: argparse.Namespace) -> None:
     print(f"Fixed errors: {diff.num_fixed_errors}", file=sys.stderr)
     print(f"New errors: {diff.num_new_errors}", file=sys.stderr)
     print(f"Total errors: {diff.total_errors}", file=sys.stderr)
+
+    if diff.num_new_errors or diff.num_fixed_errors:
+        exit(ErrorCodes.ERROR_DIFF)
 
 
 def _no_command(args: argparse.Namespace) -> None:
