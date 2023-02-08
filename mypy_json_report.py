@@ -15,6 +15,7 @@
 import argparse
 import enum
 import json
+import pathlib
 import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
@@ -47,6 +48,12 @@ def main() -> None:
         default=2,
         help="Number of spaces to indent JSON output.",
     )
+    parse_parser.add_argument(
+        "-o",
+        "--output-file",
+        type=pathlib.Path,
+        help="The file to write the JSON report to. If omitted, the report will be written to STDOUT.",
+    )
 
     parse_parser.set_defaults(func=_parse_command)
 
@@ -58,7 +65,10 @@ def _parse_command(args: argparse.Namespace) -> None:
     """Handle the `parse` command."""
     errors = parse_errors_report(sys.stdin)
     error_json = json.dumps(errors, sort_keys=True, indent=args.indentation)
-    print(error_json)
+    if args.output_file:
+        args.output_file.write_text(error_json + "\n")
+    else:
+        print(error_json)
 
 
 def _no_command(args: argparse.Namespace) -> None:
