@@ -52,7 +52,7 @@ def main() -> None:
         "-o",
         "--output-file",
         type=pathlib.Path,
-        help="The file to write the JSON report to. If omitted, the report will write to STDOUT.",
+        help="The file to write the JSON report to. If omitted, the report will be written to STDOUT.",
     )
 
     parse_parser.set_defaults(func=_parse_command)
