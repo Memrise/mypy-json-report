@@ -67,7 +67,7 @@ def _no_command(args: argparse.Namespace) -> None:
 
     This will be hit when the program is called without arguments.
     """
-    print("A subcommand is required. Pass --help for usage info.", sys.stderr)
+    print("A subcommand is required. Pass --help for usage info.", file=sys.stderr)
     sys.exit(ErrorCodes.DEPRECATED)
 
 
