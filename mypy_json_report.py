@@ -125,11 +125,11 @@ def _parse_command(args: argparse.Namespace) -> None:
 
     # Print the JSON report to file or STDOUT.
     errors = error_counter.grouped_errors
-    error_json = json.dumps(errors, sort_keys=True, indent=args.indentation)
+    error_json = json.dumps(errors, sort_keys=True, indent=args.indentation) + "\n"
     if args.output_file:
-        args.output_file.write_text(error_json + "\n")
+        args.output_file.write_text(error_json)
     else:
-        print(error_json)
+        sys.stdout.write(error_json)
 
     if tracker is None:
         return
