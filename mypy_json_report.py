@@ -14,13 +14,15 @@
 
 import argparse
 import enum
+import itertools
 import json
+import operator
 import pathlib
 import sys
 import textwrap
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from typing import Counter as CounterType, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Counter as CounterType, Dict, Iterator, List, Tuple, Union
 
 
 class ErrorCodes(enum.IntEnum):
@@ -94,10 +96,13 @@ def _parse_command(args: argparse.Namespace) -> None:
         processors.append(tracker)
 
     messages = _extract_messages(sys.stdin)
-    for message in messages:
+    for filename, messages in itertools.groupby(
+        messages, key=operator.attrgetter("filename")
+    ):
         # Send each line of the Mypy report to each processor.
+        message_group = list(messages)
         for processor in processors:
-            processor.process_message(message)
+            processor.process_messages(filename, message_group)
 
     # Print the JSON report to file or STDOUT.
     errors = error_counter.grouped_errors
@@ -191,10 +196,11 @@ class ErrorCounter:
     def __init__(self) -> None:
         self.grouped_errors: ErrorSummary = defaultdict(Counter)
 
-    def process_message(self, message: MypyMessage) -> None:
-        if message.message_type != "error":
-            return None
-        self.grouped_errors[message.filename][message.message] += 1
+    def process_messages(self, filename: str, messages: List[MypyMessage]) -> None:
+        error_strings = (m.message for m in messages if m.message_type == "error")
+        counted_errors = Counter(error_strings)
+        if counted_errors:
+            self.grouped_errors[filename] = counted_errors
 
 
 def _extract_messages(lines: Iterator[str]) -> Iterator[MypyMessage]:
@@ -227,65 +233,42 @@ class ChangeTracker:
     def __init__(self, summary: ErrorSummary) -> None:
         self.old_report = summary
         self.error_lines: List[str] = []
-        self.current_file: Optional[str] = None
         self.num_errors = 0
         self.num_new_errors = 0
         self.num_fixed_errors = 0
-        self._reset_caches()
 
-    def process_message(self, message: MypyMessage) -> None:
-        """Track a MypyMessage."""
-        if self.current_file != message.filename:
-            self._flush_batch()
-            self.current_file = message.filename
+    def process_messages(self, filename: str, messages: List[MypyMessage]) -> None:
+        error_frequencies: CounterType[str] = Counter()
+        messages_by_line_number: Dict[int, List[str]] = defaultdict(list)
+        line_numbers_by_error: Dict[str, List[int]] = defaultdict(list)
 
-        self._messages_by_line_number[message.line_number].append(message.raw)
-        if message.message_type == "error":
-            self.num_errors += 1
-            self._error_frequencies[message.message] += 1
-            self._line_numbers_by_error[message.message].append(message.line_number)
+        for message in messages:
+            if message.message_type == "error":
+                self.num_errors += 1
+                error_frequencies.update([message.message])
+                line_numbers_by_error[message.message].append(message.line_number)
+            messages_by_line_number[message.line_number].append(message.raw)
+
+        old_report_counter: CounterType[str] = Counter(self.old_report.get(filename))
+        new_errors_in_file = error_frequencies - old_report_counter
+
+        self.num_new_errors += sum(new_errors_in_file.values())
+        for new_error in new_errors_in_file:
+            for line_number in line_numbers_by_error[new_error]:
+                for raw_line in messages_by_line_number[line_number]:
+                    self.error_lines.append(raw_line)
+
+        # Find counts for errors resolved.
+        resolved_errors = old_report_counter - error_frequencies
+        self.num_fixed_errors += sum(resolved_errors.values())
 
     def diff_report(self) -> DiffReport:
-        self._flush_batch()
         return DiffReport(
             error_lines=tuple(self.error_lines),
             total_errors=self.num_errors,
             num_new_errors=self.num_new_errors,
             num_fixed_errors=self.num_fixed_errors,
         )
-
-    def _reset_caches(self) -> None:
-        """Reset the per-file caches, ready for the next file."""
-        self._messages_by_line_number: Dict[int, List[str]] = defaultdict(list)
-        self._line_numbers_by_error: Dict[str, List[int]] = defaultdict(list)
-        self._error_frequencies: CounterType[str] = Counter()
-
-    def _flush_batch(self) -> None:
-        """Go over the cached error data and populate error data based on them."""
-        # The first message that's processed will be on a "new file",
-        # but will not need flushing.
-        if self.current_file is None:
-            return
-
-        # Get the error counts from current file in the old report.
-        old_report_counter: CounterType[str] = Counter(
-            self.old_report.get(self.current_file)
-        )
-
-        # Find counts for new errors encountered.
-        new_errors = self._error_frequencies - old_report_counter
-        for new_error, frequency in new_errors.items():
-            self.num_new_errors += frequency
-            for line_number in self._line_numbers_by_error[new_error]:
-                self.error_lines.extend(self._messages_by_line_number[line_number])
-
-        # Find counts for errors resolved.
-        resolved_errors = old_report_counter - self._error_frequencies
-        for resolved_error, frequency in resolved_errors.items():
-            self.num_fixed_errors += frequency
-
-        # Reset caches now that they've been processed.
-        self._reset_caches()
 
 
 if __name__ == "__main__":

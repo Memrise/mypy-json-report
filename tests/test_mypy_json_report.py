@@ -68,7 +68,7 @@ class TestErrorCounter:
         error_counter = ErrorCounter()
         message = MypyMessage.from_line("file.py:8: error: An example type error")
 
-        error_counter.process_message(message)
+        error_counter.process_messages("file.py", [message])
 
         assert error_counter.grouped_errors == {
             "file.py": {"An example type error": 1},
@@ -78,8 +78,7 @@ class TestErrorCounter:
         error_counter = ErrorCounter()
         message = MypyMessage.from_line("file.py:8: error: An example type error")
 
-        error_counter.process_message(message)
-        error_counter.process_message(message)
+        error_counter.process_messages("file.py", [message, message])
 
         assert error_counter.grouped_errors == {
             "file.py": {"An example type error": 2},
@@ -89,7 +88,7 @@ class TestErrorCounter:
         error_counter = ErrorCounter()
         message = MypyMessage.from_line("file.py:8: note: An example note")
 
-        error_counter.process_message(message)
+        error_counter.process_messages("file.py", [message])
 
         # The note was not added to the grouped_errors.
         assert error_counter.grouped_errors == {}
@@ -107,8 +106,9 @@ class TestChangeTracker:
 
     def test_new_error(self) -> None:
         tracker = ChangeTracker(summary={})
-        tracker.process_message(
-            MypyMessage.from_line("file.py:8: error: An example type error")
+        tracker.process_messages(
+            "file.py",
+            [MypyMessage.from_line("file.py:8: error: An example type error")],
         )
 
         report = tracker.diff_report()
@@ -122,8 +122,9 @@ class TestChangeTracker:
 
     def test_known_error(self) -> None:
         tracker = ChangeTracker(summary={"file.py": {"An example type error": 1}})
-        tracker.process_message(
-            MypyMessage.from_line("file.py:8: error: An example type error")
+        tracker.process_messages(
+            "file.py",
+            [MypyMessage.from_line("file.py:8: error: An example type error")],
         )
 
         report = tracker.diff_report()
@@ -134,8 +135,9 @@ class TestChangeTracker:
 
     def test_fixed_error(self) -> None:
         tracker = ChangeTracker(summary={"file.py": {"An example type error": 2}})
-        tracker.process_message(
-            MypyMessage.from_line("file.py:8: error: An example type error")
+        tracker.process_messages(
+            "file.py",
+            [MypyMessage.from_line("file.py:8: error: An example type error")],
         )
 
         report = tracker.diff_report()
@@ -149,14 +151,13 @@ class TestChangeTracker:
 
     def test_more_errors_of_same_type(self) -> None:
         tracker = ChangeTracker(summary={"file.py": {"An example type error": 1}})
-        tracker.process_message(
-            MypyMessage.from_line("file.py:1: error: An example type error")
-        )
-        tracker.process_message(
-            MypyMessage.from_line("file.py:2: error: An example type error")
-        )
-        tracker.process_message(
-            MypyMessage.from_line("file.py:3: error: An example type error")
+        tracker.process_messages(
+            "file.py",
+            [
+                MypyMessage.from_line("file.py:1: error: An example type error"),
+                MypyMessage.from_line("file.py:2: error: An example type error"),
+                MypyMessage.from_line("file.py:3: error: An example type error"),
+            ],
         )
 
         report = tracker.diff_report()
@@ -174,11 +175,12 @@ class TestChangeTracker:
 
     def test_note_on_same_line(self) -> None:
         tracker = ChangeTracker(summary={})
-        tracker.process_message(
-            MypyMessage.from_line("file.py:1: error: An example type error")
-        )
-        tracker.process_message(
-            MypyMessage.from_line("file.py:1: note: An example note")
+        tracker.process_messages(
+            "file.py",
+            [
+                MypyMessage.from_line("file.py:1: error: An example type error"),
+                MypyMessage.from_line("file.py:1: note: An example note"),
+            ],
         )
 
         report = tracker.diff_report()
@@ -195,11 +197,13 @@ class TestChangeTracker:
 
     def test_error_in_new_file(self) -> None:
         tracker = ChangeTracker(summary={"file.py": {"An example type error": 1}})
-        tracker.process_message(
-            MypyMessage.from_line("file.py:1: error: An example type error")
+        tracker.process_messages(
+            "file.py",
+            [MypyMessage.from_line("file.py:1: error: An example type error")],
         )
-        tracker.process_message(
-            MypyMessage.from_line("other.py:1: error: An example type error")
+        tracker.process_messages(
+            "other.py",
+            [MypyMessage.from_line("other.py:1: error: An example type error")],
         )
 
         report = tracker.diff_report()
