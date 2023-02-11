@@ -22,7 +22,7 @@ import sys
 import textwrap
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from typing import Counter as CounterType, Dict, Iterator, List, Tuple, Union
+from typing import Counter as CounterType, Dict, Iterable, Iterator, List, Tuple, Union
 
 
 class ErrorCodes(enum.IntEnum):
@@ -95,7 +95,7 @@ def _parse_command(args: argparse.Namespace) -> None:
         tracker = ChangeTracker(old_report)
         processors.append(tracker)
 
-    messages = _extract_messages(sys.stdin)
+    messages = MypyMessage.from_lines(sys.stdin)
     for filename, messages in itertools.groupby(
         messages, key=operator.attrgetter("filename")
     ):
@@ -150,6 +150,15 @@ class MypyMessage:
     raw: str
 
     @classmethod
+    def from_lines(cls, lines: Iterable[str]) -> Iterator["MypyMessage"]:
+        """Given lines from mypy's output, yield a series of MypyMessage objects."""
+        for line in lines:
+            try:
+                yield MypyMessage.from_line(line)
+            except ParseError:
+                continue
+
+    @classmethod
     def from_line(cls, line: str) -> "MypyMessage":
         try:
             location, message_type, message = line.strip().split(": ", 2)
@@ -201,15 +210,6 @@ class ErrorCounter:
         counted_errors = Counter(error_strings)
         if counted_errors:
             self.grouped_errors[filename] = counted_errors
-
-
-def _extract_messages(lines: Iterator[str]) -> Iterator[MypyMessage]:
-    """Given lines from mypy's output, yield a series of MypyMessage objects."""
-    for line in lines:
-        try:
-            yield MypyMessage.from_line(line)
-        except ParseError:
-            continue
 
 
 @dataclass(frozen=True)
