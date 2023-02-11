@@ -22,7 +22,17 @@ import sys
 import textwrap
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from typing import Counter as CounterType, Dict, Iterable, Iterator, List, Tuple, Union
+from typing import (
+    Counter as CounterType,
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
 
 
 class ErrorCodes(enum.IntEnum):
@@ -82,6 +92,16 @@ def main() -> None:
     parsed.func(parsed)
 
 
+ErrorSummary = Dict[str, Dict[str, int]]
+
+
+def _load_json_file(filepath: Optional[pathlib.Path]) -> Optional[ErrorSummary]:
+    if not filepath:
+        return None
+    with filepath.open() as old_report_file:
+        return cast(ErrorSummary, json.load(old_report_file))
+
+
 def _parse_command(args: argparse.Namespace) -> None:
     """Handle the `parse` command."""
     error_counter = ErrorCounter()
@@ -89,9 +109,8 @@ def _parse_command(args: argparse.Namespace) -> None:
 
     # If we have access to an old report, add the ChangeTracker processor.
     tracker = None
-    if args.diff_old_report:
-        with args.diff_old_report.open() as old_report_file:
-            old_report = json.load(old_report_file)
+    old_report = _load_json_file(args.diff_old_report)
+    if old_report is not None:
         tracker = ChangeTracker(old_report)
         processors.append(tracker)
 
@@ -181,9 +200,6 @@ class MypyMessage:
             message_type=message_type,
             raw=line.rstrip(),
         )
-
-
-ErrorSummary = Dict[str, Dict[str, int]]
 
 
 class ErrorCounter:
