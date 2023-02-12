@@ -38,9 +38,10 @@ from typing import (
 
 
 class ErrorCodes(enum.IntEnum):
-    DEPRECATED = 1
+    # 1 is returned when an uncaught exception is raised.
     # Argparse returns 2 when bad args are passed.
     ERROR_DIFF = 3
+    DEPRECATED = 4
 
 
 def main() -> None:
