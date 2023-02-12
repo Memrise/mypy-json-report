@@ -23,6 +23,8 @@ import textwrap
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from typing import (
+    Any,
+    Callable,
     Counter as CounterType,
     Dict,
     Iterable,
@@ -104,7 +106,13 @@ def _load_json_file(filepath: Optional[pathlib.Path]) -> Optional[ErrorSummary]:
 
 def _parse_command(args: argparse.Namespace) -> None:
     """Handle the `parse` command."""
-    error_counter = ErrorCounter()
+    if args.output_file:
+        report_writer = args.output_file.write_text
+    else:
+        report_writer = sys.stdout.write
+    error_counter = ErrorCounter(
+        report_writer=report_writer, indentation=args.indentation
+    )
     processors: List[Union[ErrorCounter, ChangeTracker]] = [error_counter]
 
     # If we have access to an old report, add the ChangeTracker processor.
@@ -123,27 +131,10 @@ def _parse_command(args: argparse.Namespace) -> None:
         for processor in processors:
             processor.process_messages(filename, message_group)
 
-    # Print the JSON report to file or STDOUT.
-    errors = error_counter.grouped_errors
-    error_json = json.dumps(errors, sort_keys=True, indent=args.indentation) + "\n"
-    if args.output_file:
-        args.output_file.write_text(error_json)
-    else:
-        sys.stdout.write(error_json)
-
-    if tracker is None:
-        return
-
-    # Print the changes since the last report to STDERR.
-    diff = tracker.diff_report()
-    new_errors = "\n".join(diff.error_lines)
-    print(new_errors, file=sys.stderr)
-    print(f"Fixed errors: {diff.num_fixed_errors}", file=sys.stderr)
-    print(f"New errors: {diff.num_new_errors}", file=sys.stderr)
-    print(f"Total errors: {diff.total_errors}", file=sys.stderr)
-
-    if diff.num_new_errors or diff.num_fixed_errors:
-        exit(ErrorCodes.ERROR_DIFF)
+    for processor in processors:
+        error_code = processor.write_report()
+        if error_code is not None:
+            exit(error_code)
 
 
 def _no_command(args: argparse.Namespace) -> None:
@@ -218,14 +209,22 @@ class ErrorCounter:
         }
     """
 
-    def __init__(self) -> None:
+    def __init__(self, report_writer: Callable[[str], Any], indentation: int) -> None:
         self.grouped_errors: ErrorSummary = defaultdict(Counter)
+        self.report_writer = report_writer
+        self.indentation = indentation
 
     def process_messages(self, filename: str, messages: List[MypyMessage]) -> None:
         error_strings = (m.message for m in messages if m.message_type == "error")
         counted_errors = Counter(error_strings)
         if counted_errors:
             self.grouped_errors[filename] = counted_errors
+
+    def write_report(self) -> Optional[ErrorCodes]:
+        errors = self.grouped_errors
+        error_json = json.dumps(errors, sort_keys=True, indent=self.indentation) + "\n"
+        self.report_writer(error_json)
+        return None
 
 
 @dataclass(frozen=True)
@@ -285,6 +284,18 @@ class ChangeTracker:
             num_new_errors=self.num_new_errors,
             num_fixed_errors=self.num_fixed_errors,
         )
+
+    def write_report(self) -> Optional[ErrorCodes]:
+        diff = self.diff_report()
+        new_errors = "\n".join(diff.error_lines)
+        print(new_errors, file=sys.stderr)
+        print(f"Fixed errors: {diff.num_fixed_errors}", file=sys.stderr)
+        print(f"New errors: {diff.num_new_errors}", file=sys.stderr)
+        print(f"Total errors: {diff.total_errors}", file=sys.stderr)
+
+        if diff.num_new_errors or diff.num_fixed_errors:
+            return ErrorCodes.ERROR_DIFF
+        return None
 
 
 if __name__ == "__main__":

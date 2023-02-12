@@ -1,3 +1,6 @@
+import sys
+from unittest import mock
+
 import pytest
 
 from mypy_json_report import (
@@ -91,7 +94,7 @@ class TestMypyMessageFromLine:
 
 class TestErrorCounter:
     def test_new_unseen_error(self) -> None:
-        error_counter = ErrorCounter()
+        error_counter = ErrorCounter(report_writer=mock.MagicMock(), indentation=0)
         message = MypyMessage.from_line("file.py:8: error: An example type error")
 
         error_counter.process_messages("file.py", [message])
@@ -101,7 +104,7 @@ class TestErrorCounter:
         }
 
     def test_errors_counted(self) -> None:
-        error_counter = ErrorCounter()
+        error_counter = ErrorCounter(report_writer=mock.MagicMock(), indentation=0)
         message = MypyMessage.from_line("file.py:8: error: An example type error")
 
         error_counter.process_messages("file.py", [message, message])
@@ -111,13 +114,33 @@ class TestErrorCounter:
         }
 
     def test_notes_uncounted(self) -> None:
-        error_counter = ErrorCounter()
+        error_counter = ErrorCounter(report_writer=mock.MagicMock(), indentation=0)
         message = MypyMessage.from_line("file.py:8: note: An example note")
 
         error_counter.process_messages("file.py", [message])
 
         # The note was not added to the grouped_errors.
         assert error_counter.grouped_errors == {}
+
+    def test_write_empty_report(self) -> None:
+        writer = mock.MagicMock(autospec=sys.stdout.write)
+        error_counter = ErrorCounter(report_writer=writer, indentation=0)
+
+        error_counter.write_report()
+
+        writer.assert_called_once_with("{}\n")
+
+    def test_write_populated_report(self) -> None:
+        writer = mock.MagicMock(autospec=sys.stdout.write)
+        error_counter = ErrorCounter(report_writer=writer, indentation=0)
+        message = MypyMessage.from_line("file.py:8: error: An example type error")
+        error_counter.process_messages("file.py", [message])
+
+        error_counter.write_report()
+
+        writer.assert_called_once_with(
+            '{\n"file.py": {\n"An example type error": 1\n}\n}\n'
+        )
 
 
 class TestChangeTracker:
