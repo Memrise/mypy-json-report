@@ -286,12 +286,13 @@ class ChangeTracker:
         )
 
     def write_report(self) -> Optional[ErrorCodes]:
+        write = sys.stderr.write
         diff = self.diff_report()
         new_errors = "\n".join(diff.error_lines)
-        print(new_errors, file=sys.stderr)
-        print(f"Fixed errors: {diff.num_fixed_errors}", file=sys.stderr)
-        print(f"New errors: {diff.num_new_errors}", file=sys.stderr)
-        print(f"Total errors: {diff.total_errors}", file=sys.stderr)
+        write(new_errors + "\n")
+        write(f"Fixed errors: {diff.num_fixed_errors}\n")
+        write(f"New errors: {diff.num_new_errors}\n")
+        write(f"Total errors: {diff.total_errors}\n")
 
         if diff.num_new_errors or diff.num_fixed_errors:
             return ErrorCodes.ERROR_DIFF
