@@ -182,7 +182,16 @@ class TestChangeTracker:
             error_lines=(), total_errors=1, num_new_errors=0, num_fixed_errors=0
         )
 
-    def test_fixed_error(self) -> None:
+    def test_error_completely_fixed(self) -> None:
+        tracker = ChangeTracker(summary={"file.py": {"An example type error": 2}})
+
+        report = tracker.diff_report()
+
+        assert report == DiffReport(
+            error_lines=(), total_errors=0, num_new_errors=0, num_fixed_errors=2
+        )
+
+    def test_error_partially_fixed(self) -> None:
         tracker = ChangeTracker(summary={"file.py": {"An example type error": 2}})
         tracker.process_messages(
             "file.py",

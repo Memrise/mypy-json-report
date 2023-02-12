@@ -264,7 +264,9 @@ class ChangeTracker:
                 line_numbers_by_error[message.message].append(message.line_number)
             messages_by_line_number[message.line_number].append(message.raw)
 
-        old_report_counter: CounterType[str] = Counter(self.old_report.get(filename))
+        old_report_counter: CounterType[str] = Counter(
+            self.old_report.pop(filename, None)
+        )
         new_errors_in_file = error_frequencies - old_report_counter
 
         self.num_new_errors += sum(new_errors_in_file.values())
@@ -278,11 +280,12 @@ class ChangeTracker:
         self.num_fixed_errors += sum(resolved_errors.values())
 
     def diff_report(self) -> DiffReport:
+        unseen_errors = sum(sum(errors.values()) for errors in self.old_report.values())
         return DiffReport(
             error_lines=tuple(self.error_lines),
             total_errors=self.num_errors,
             num_new_errors=self.num_new_errors,
-            num_fixed_errors=self.num_fixed_errors,
+            num_fixed_errors=self.num_fixed_errors + unseen_errors,
         )
 
     def write_report(self) -> Optional[ErrorCodes]:
