@@ -110,10 +110,9 @@ def _parse_command(args: argparse.Namespace) -> None:
         report_writer = args.output_file.write_text
     else:
         report_writer = sys.stdout.write
-    error_counter = ErrorCounter(
-        report_writer=report_writer, indentation=args.indentation
-    )
-    processors: List[Union[ErrorCounter, ChangeTracker]] = [error_counter]
+    processors: List[Union[ErrorCounter, ChangeTracker]] = [
+        ErrorCounter(report_writer=report_writer, indentation=args.indentation)
+    ]
 
     # If we have access to an old report, add the ChangeTracker processor.
     tracker = None
