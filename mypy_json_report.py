@@ -101,8 +101,8 @@ ErrorSummary = Dict[str, Dict[str, int]]
 def _load_json_file(filepath: Optional[pathlib.Path]) -> Optional[ErrorSummary]:
     if not filepath:
         return None
-    with filepath.open() as old_report_file:
-        return cast(ErrorSummary, json.load(old_report_file))
+    with filepath.open() as json_file:
+        return cast(ErrorSummary, json.load(json_file))
 
 
 def _parse_command(args: argparse.Namespace) -> None:
