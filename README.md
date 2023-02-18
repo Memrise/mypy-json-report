@@ -53,7 +53,7 @@ and repeated errors are counted.
 
 ## Ratchet file
 
-The `--diff-old-report FILNAME` flag serves two purposes.
+The `--diff-old-report FILENAME` flag serves two purposes.
 
 1. It prints new (and adjacent, and similar) errors to STDERR.
    This is useful for seeing what errors need to be fixed before committing.

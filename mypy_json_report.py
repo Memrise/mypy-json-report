@@ -81,7 +81,7 @@ def main() -> None:
             f"""\
             An old report to compare against. We will compare the errors in there to the new report.
             Fail with return code {ErrorCodes.ERROR_DIFF} if we discover any new errors.
-            New errors will be printed to strerr.
+            New errors will be printed to stderr.
             Similar errors from the same file will also be printed
             (because we don't know which error is the new one).
             For completeness other hints and errors on the same lines are also printed.
