@@ -14,9 +14,9 @@ Pipe the output of mypy through the `mypy-json-report` CLI app.
 Store the output to a file, and commit it to your git repo.
 
 ```
-mypy . --strict | mypy-json-report parse > known-mypy-errors.json
-git add known-mypy-errors.json
-git commit -m "Add mypy errors lockfile"
+mypy . --strict | mypy-json-report parse --output-file mypy-ratchet.json
+git add mypy-ratchet.json
+git commit -m "Add mypy errors ratchet file"
 ```
 
 Now you have a snapshot of the mypy errors in your project.
@@ -50,6 +50,17 @@ To reduce churn,
 the line on which the errors occur is removed
 and repeated errors are counted.
 
+
+## Ratchet file
+
+The `--diff-old-report FILENAME` flag serves two purposes.
+
+1. It prints new (and adjacent, and similar) errors to STDERR.
+   This is useful for seeing what errors need to be fixed before committing.
+
+1. It will error when the ratchet file doesn't match the new report.
+   This is helpful for catching uncommitted changes in CI.
+
 ## Example usage
 
 You could create a GitHub Action to catch regressions (or improvements).
@@ -80,9 +91,5 @@ jobs:
 
       - name: Run mypy
         run: |
-          mypy . --strict | mypy-json-report parse > known-mypy-errors.json
-
-      - name: Check for mypy changes
-        run: |
-          git diff --exit-code
+          mypy . --strict | mypy-json-report parse --diff-old-report mypy-ratchet.json --output-file mypy-ratchet.json
 ```

@@ -6,6 +6,7 @@
   Invocations of `mypy-json-report` should now be replaced with `mypy-json-report parse`.
 - Add `parse --indentation` flag to grant control over how much indentation is used in the JSON report.
 - Add `parse --output-file` flag to allow sending report direct to a file rather than STDOUT.
+- Add `parse --diff-old-report` flag for a report of the difference since the last JSON report.
 - Use GA version of Python 3.11 in test matrix.
 
 ## v0.1.3 [2022-09-07]
