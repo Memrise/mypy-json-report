@@ -213,11 +213,10 @@ class ErrorCounter:
         if counted_errors:
             self.grouped_errors[filename] = counted_errors
 
-    def write_report(self) -> Optional[ErrorCodes]:
+    def write_report(self) -> None:
         errors = self.grouped_errors
         error_json = json.dumps(errors, sort_keys=True, indent=self.indentation) + "\n"
         self.report_writer(error_json)
-        return None
 
 
 @dataclass(frozen=True)
