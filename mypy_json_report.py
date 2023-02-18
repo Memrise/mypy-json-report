@@ -176,14 +176,7 @@ class MypyMessage:
             # Expected to happen on summary lines.
             # We could avoid this by requiring --no-error-summary
             raise ParseError from e
-        elements = location.split(":")
-        num_elements = len(elements)
-        if num_elements == 2:
-            filename, line_number = elements
-        elif num_elements == 3:
-            filename, line_number, _ = elements
-        else:
-            raise ParseError(f"Don't know how to parse: {location}")
+        filename, line_number, *_ = location.split(":")
         return MypyMessage(
             filename=filename,
             line_number=int(line_number),
