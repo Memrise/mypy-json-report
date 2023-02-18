@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v1.0.0 [2022-09-07]
+
 - *Action required:* Move existing behaviour under "parse" subcommand.
   Invocations of `mypy-json-report` should now be replaced with `mypy-json-report parse`.
 - Add `parse --indentation` flag to grant control over how much indentation is used in the JSON report.
