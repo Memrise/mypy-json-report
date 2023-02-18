@@ -97,9 +97,9 @@ def main() -> None:
 ErrorSummary = Dict[str, Dict[str, int]]
 
 
-def _load_json_file(filepath: pathlib.Path) -> Dict[str, Any]:
+def _load_json_file(filepath: pathlib.Path) -> Any:
     with filepath.open() as json_file:
-        return cast(ErrorSummary, json.load(json_file))
+        return json.load(json_file)
 
 
 def _parse_command(args: argparse.Namespace) -> None:
