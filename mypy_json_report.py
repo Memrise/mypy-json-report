@@ -31,7 +31,6 @@ from typing import (
     Iterator,
     List,
     Optional,
-    Tuple,
     Union,
     cast,
 )
@@ -221,7 +220,7 @@ class ErrorCounter:
 
 @dataclass(frozen=True)
 class DiffReport:
-    error_lines: Tuple[str, ...]
+    error_lines: List[str]
     total_errors: int
     num_new_errors: int
     num_fixed_errors: int
@@ -273,7 +272,7 @@ class ChangeTracker:
     def diff_report(self) -> DiffReport:
         unseen_errors = sum(sum(errors.values()) for errors in self.old_report.values())
         return DiffReport(
-            error_lines=tuple(self.error_lines),
+            error_lines=self.error_lines,
             total_errors=self.num_errors,
             num_new_errors=self.num_new_errors,
             num_fixed_errors=self.num_fixed_errors + unseen_errors,

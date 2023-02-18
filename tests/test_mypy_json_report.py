@@ -150,7 +150,7 @@ class TestChangeTracker:
         report = tracker.diff_report()
 
         assert report == DiffReport(
-            error_lines=(), total_errors=0, num_new_errors=0, num_fixed_errors=0
+            error_lines=[], total_errors=0, num_new_errors=0, num_fixed_errors=0
         )
 
     def test_new_error(self) -> None:
@@ -163,7 +163,7 @@ class TestChangeTracker:
         report = tracker.diff_report()
 
         assert report == DiffReport(
-            error_lines=("file.py:8: error: An example type error",),
+            error_lines=["file.py:8: error: An example type error"],
             total_errors=1,
             num_new_errors=1,
             num_fixed_errors=0,
@@ -179,7 +179,7 @@ class TestChangeTracker:
         report = tracker.diff_report()
 
         assert report == DiffReport(
-            error_lines=(), total_errors=1, num_new_errors=0, num_fixed_errors=0
+            error_lines=[], total_errors=1, num_new_errors=0, num_fixed_errors=0
         )
 
     def test_error_completely_fixed(self) -> None:
@@ -188,7 +188,7 @@ class TestChangeTracker:
         report = tracker.diff_report()
 
         assert report == DiffReport(
-            error_lines=(), total_errors=0, num_new_errors=0, num_fixed_errors=2
+            error_lines=[], total_errors=0, num_new_errors=0, num_fixed_errors=2
         )
 
     def test_error_partially_fixed(self) -> None:
@@ -201,7 +201,7 @@ class TestChangeTracker:
         report = tracker.diff_report()
 
         assert report == DiffReport(
-            error_lines=(),
+            error_lines=[],
             total_errors=1,
             num_new_errors=0,
             num_fixed_errors=1,
@@ -221,11 +221,11 @@ class TestChangeTracker:
         report = tracker.diff_report()
 
         assert report == DiffReport(
-            error_lines=(
+            error_lines=[
                 "file.py:1: error: An example type error",
                 "file.py:2: error: An example type error",
                 "file.py:3: error: An example type error",
-            ),
+            ],
             total_errors=3,
             num_new_errors=2,
             num_fixed_errors=0,
@@ -244,10 +244,10 @@ class TestChangeTracker:
         report = tracker.diff_report()
 
         assert report == DiffReport(
-            error_lines=(
+            error_lines=[
                 "file.py:1: error: An example type error",
                 "file.py:1: note: An example note",
-            ),
+            ],
             total_errors=1,
             num_new_errors=1,
             num_fixed_errors=0,
@@ -267,7 +267,7 @@ class TestChangeTracker:
         report = tracker.diff_report()
 
         assert report == DiffReport(
-            error_lines=("other.py:1: error: An example type error",),
+            error_lines=["other.py:1: error: An example type error"],
             total_errors=2,
             num_new_errors=1,
             num_fixed_errors=0,
