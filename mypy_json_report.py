@@ -215,8 +215,8 @@ class ErrorCounter:
 
     def write_report(self) -> None:
         errors = self.grouped_errors
-        error_json = json.dumps(errors, sort_keys=True, indent=self.indentation) + "\n"
-        self.report_writer(error_json)
+        error_json = json.dumps(errors, sort_keys=True, indent=self.indentation)
+        self.report_writer(error_json + "\n")
 
 
 @dataclass(frozen=True)
