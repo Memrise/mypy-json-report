@@ -97,7 +97,7 @@ def main() -> None:
 ErrorSummary = Dict[str, Dict[str, int]]
 
 
-def _load_json_file(filepath: pathlib.Path) -> ErrorSummary:
+def _load_json_file(filepath: pathlib.Path) -> Dict[str, Any]:
     with filepath.open() as json_file:
         return cast(ErrorSummary, json.load(json_file))
 
@@ -115,7 +115,7 @@ def _parse_command(args: argparse.Namespace) -> None:
     # If we have access to an old report, add the ChangeTracker processor.
     tracker = None
     if args.diff_old_report is not None:
-        old_report = _load_json_file(args.diff_old_report)
+        old_report = cast(ErrorSummary, _load_json_file(args.diff_old_report))
         tracker = ChangeTracker(old_report)
         processors.append(tracker)
 
