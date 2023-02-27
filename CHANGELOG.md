@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Handle mypy emitting output for files out of order.
+
 ## v1.0.0 [2022-09-07]
 
 - *Action required:* Move existing behaviour under "parse" subcommand.
