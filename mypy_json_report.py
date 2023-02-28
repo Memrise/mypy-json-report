@@ -120,8 +120,13 @@ def _parse_command(args: argparse.Namespace) -> None:
         processors.append(tracker)
 
     messages = MypyMessage.from_lines(sys.stdin)
+
+    # Sort the lines by the filename otherwise itertools.groupby() will make
+    # multiple groups for the same file name if the lines are out of order.
+    messages_sorted = sorted(messages, key=operator.attrgetter("filename"))
+
     for filename, messages in itertools.groupby(
-        messages, key=operator.attrgetter("filename")
+        messages_sorted, key=operator.attrgetter("filename")
     ):
         # Send each line of the Mypy report to each processor.
         message_group = list(messages)
