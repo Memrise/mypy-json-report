@@ -123,7 +123,7 @@ def _parse_command(args: argparse.Namespace) -> None:
 
     # Sort the lines by the filename otherwise itertools.groupby() will make
     # multiple groups for the same file name if the lines are out of order.
-    messages_sorted = sorted(list(messages), key=operator.attrgetter("filename"))
+    messages_sorted = sorted(messages, key=operator.attrgetter("filename"))
 
     for filename, messages in itertools.groupby(
         messages_sorted, key=operator.attrgetter("filename")
