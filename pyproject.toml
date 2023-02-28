@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mypy-json-report"
-version = "1.0.0"
+version = "1.0.1"
 description = "Generate a JSON report from your mypy output"
 authors = ["Charlie Denton <charlie@meshy.co.uk>"]
 license = "Apache-2.0"
