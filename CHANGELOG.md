@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fix duplicated reporting of new errors when multiple errors occurred on the same line.
+
 ## v1.0.1 [2023-02-28]
 
 - Handle mypy emitting output for files out of order.

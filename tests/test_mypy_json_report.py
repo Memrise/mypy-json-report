@@ -272,3 +272,25 @@ class TestChangeTracker:
             num_new_errors=1,
             num_fixed_errors=0,
         )
+
+    def test_multiple_errors_on_same_line(self) -> None:
+        tracker = ChangeTracker(summary={})
+        tracker.process_messages(
+            "file.py",
+            [
+                MypyMessage.from_line("file.py:1: error: An example type error"),
+                MypyMessage.from_line("file.py:1: error: Another example type error"),
+            ],
+        )
+
+        report = tracker.diff_report()
+
+        assert report == DiffReport(
+            error_lines=[
+                "file.py:1: error: An example type error",
+                "file.py:1: error: Another example type error",
+            ],
+            total_errors=2,
+            num_new_errors=2,
+            num_fixed_errors=0,
+        )

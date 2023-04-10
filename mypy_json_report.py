@@ -266,7 +266,7 @@ class ChangeTracker:
         self.num_new_errors += sum(new_errors_in_file.values())
         for new_error in new_errors_in_file:
             for line_number in line_numbers_by_error[new_error]:
-                self.error_lines.extend(messages_by_line_number[line_number])
+                self.error_lines.extend(messages_by_line_number.pop(line_number, []))
 
         # Find counts for errors resolved.
         resolved_errors = old_report_counter - error_frequencies
