@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+
+## v1.0.2 [2023-04-10]
+
 - Fix duplicated reporting of new errors when multiple errors occurred on the same line.
 
 ## v1.0.1 [2023-02-28]
