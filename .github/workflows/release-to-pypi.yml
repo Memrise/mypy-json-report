@@ -7,7 +7,7 @@ on:
       - v*
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-22.04
     timeout-minutes: 5
 
@@ -29,8 +29,25 @@ jobs:
       - name: Build package
         run: poetry build
 
-      - name: Upload to PyPI
-        env:
-          POETRY_HTTP_BASIC_PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          POETRY_HTTP_BASIC_PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-        run: poetry publish
+      - name: Store release files
+        uses: actions/upload-artifact@v3
+        with:
+          name: release
+          path: dist/
+
+  upload:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Fetch release files
+        uses: actions/download-artifact@v3
+        with:
+          name: release
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
