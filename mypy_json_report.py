@@ -136,7 +136,7 @@ def _parse_command(args: argparse.Namespace) -> None:
     for processor in processors:
         error_code = processor.write_report()
         if error_code is not None:
-            exit(error_code)
+            sys.exit(error_code)
 
 
 def _no_command(args: argparse.Namespace) -> None:
