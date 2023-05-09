@@ -38,6 +38,8 @@ jobs:
   upload:
     runs-on: ubuntu-22.04
     timeout-minutes: 5
+    needs:
+      - build
 
     permissions:
       id-token: write
