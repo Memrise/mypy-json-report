@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v1.0.4 [2023-05-09]
+
 - Fix release workflow by declaring missing dependency.
 
 ## v1.0.3 [2023-05-09]
