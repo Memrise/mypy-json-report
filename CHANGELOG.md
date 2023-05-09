@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v1.0.3 [2023-05-09]
+
 - Make use of [Trusted Publishing](https://blog.pypi.org/posts/2023-04-20-introducing-trusted-publishers/) when releasing new versions to PyPI.
 - Replace isort and pyupgrade with ruff for code linting.
 - Add Python 3.12 to test matrix
