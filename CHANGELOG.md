@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Make use of [Trusted Publishing](https://blog.pypi.org/posts/2023-04-20-introducing-trusted-publishers/) when releasing new versions to PyPI.
+- Replace isort and pyupgrade with ruff for code linting.
 
 ## v1.0.2 [2023-04-10]
 

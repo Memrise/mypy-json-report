@@ -40,8 +40,19 @@ mypy-json-report = "mypy_json_report:main"
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.isort]
-combine_as_imports = true
-known_first_party = ["mypy_json_report"]
-lines_after_imports = 2
-profile = "black"
+[tool.ruff]
+target-version = "py37"
+select = [
+    "E",  # pycodestyle
+    "F",  # Pyflakes
+    "I",  # isort
+    "PL",  # Pylint
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # Line too long
+]
+
+[tool.ruff.isort]
+combine-as-imports = true
+lines-after-imports = 2
