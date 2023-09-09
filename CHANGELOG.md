@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Drop support for Python 3.7
+
 ## v1.0.4 [2023-05-09]
 
 - Fix release workflow by declaring missing dependency.
