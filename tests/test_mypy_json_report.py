@@ -99,9 +99,7 @@ class TestErrorCounter:
 
         error_counter.process_messages("file.py", [message])
 
-        assert error_counter.grouped_errors == {
-            "file.py": {"An example type error": 1},
-        }
+        assert error_counter.grouped_errors == {"file.py": {"An example type error": 1}}
 
     def test_errors_counted(self) -> None:
         error_counter = ErrorCounter(report_writer=mock.MagicMock(), indentation=0)
@@ -109,9 +107,7 @@ class TestErrorCounter:
 
         error_counter.process_messages("file.py", [message, message])
 
-        assert error_counter.grouped_errors == {
-            "file.py": {"An example type error": 2},
-        }
+        assert error_counter.grouped_errors == {"file.py": {"An example type error": 2}}
 
     def test_notes_uncounted(self) -> None:
         error_counter = ErrorCounter(report_writer=mock.MagicMock(), indentation=0)
@@ -201,10 +197,7 @@ class TestChangeTracker:
         report = tracker.diff_report()
 
         assert report == DiffReport(
-            error_lines=[],
-            total_errors=1,
-            num_new_errors=0,
-            num_fixed_errors=1,
+            error_lines=[], total_errors=1, num_new_errors=0, num_fixed_errors=1
         )
 
     def test_more_errors_of_same_type(self) -> None:

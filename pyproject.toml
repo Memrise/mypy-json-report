@@ -53,6 +53,10 @@ ignore = [
     "E501",  # Line too long
 ]
 
+[tool.ruff.format]
+skip-magic-trailing-comma = true
+
 [tool.ruff.isort]
 combine-as-imports = true
 lines-after-imports = 2
+split-on-trailing-comma = false
