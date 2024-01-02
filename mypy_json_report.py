@@ -31,6 +31,7 @@ from typing import (
     Iterator,
     List,
     Optional,
+    Protocol,
     Union,
     cast,
 )
@@ -116,7 +117,8 @@ def _parse_command(args: argparse.Namespace) -> None:
     tracker = None
     if args.diff_old_report is not None:
         old_report = cast(ErrorSummary, _load_json_file(args.diff_old_report))
-        tracker = ChangeTracker(old_report)
+        change_report_writer = DefaultChangeReportWriter()
+        tracker = ChangeTracker(old_report, report_writer=change_report_writer)
         processors.append(tracker)
 
     messages = MypyMessage.from_lines(sys.stdin)
@@ -229,6 +231,23 @@ class DiffReport:
     num_fixed_errors: int
 
 
+class _ChangeReportWriter(Protocol):
+    def write_report(self, diff: DiffReport) -> None:
+        ...
+
+
+class DefaultChangeReportWriter:
+    def __init__(self, _write: Callable[[str], Any] = sys.stdout.write) -> None:
+        self.write = _write
+
+    def write_report(self, diff: DiffReport) -> None:
+        new_errors = "\n".join(diff.error_lines)
+        self.write(new_errors + "\n")
+        self.write(f"Fixed errors: {diff.num_fixed_errors}\n")
+        self.write(f"New errors: {diff.num_new_errors}\n")
+        self.write(f"Total errors: {diff.total_errors}\n")
+
+
 class ChangeTracker:
     """
     Compares the current Mypy report against a previous summary.
@@ -239,8 +258,11 @@ class ChangeTracker:
     that are cached in memory.
     """
 
-    def __init__(self, summary: ErrorSummary) -> None:
+    def __init__(
+        self, summary: ErrorSummary, report_writer: _ChangeReportWriter
+    ) -> None:
         self.old_report = summary
+        self.report_writer = report_writer
         self.error_lines: List[str] = []
         self.num_errors = 0
         self.num_new_errors = 0
@@ -282,13 +304,8 @@ class ChangeTracker:
         )
 
     def write_report(self) -> Optional[ErrorCodes]:
-        write = sys.stderr.write
         diff = self.diff_report()
-        new_errors = "\n".join(diff.error_lines)
-        write(new_errors + "\n")
-        write(f"Fixed errors: {diff.num_fixed_errors}\n")
-        write(f"New errors: {diff.num_new_errors}\n")
-        write(f"Total errors: {diff.total_errors}\n")
+        self.report_writer.write_report(diff)
 
         if diff.num_new_errors or diff.num_fixed_errors:
             return ErrorCodes.ERROR_DIFF
