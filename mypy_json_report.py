@@ -88,6 +88,13 @@ def main() -> None:
             """
         ),
     )
+    parse_parser.add_argument(
+        "-c",
+        "--color",
+        "--colour",
+        action="store_true",
+        help="Whether to colorize the diff-report output. Defaults to False.",
+    )
 
     parse_parser.set_defaults(func=_parse_command)
 
@@ -117,7 +124,11 @@ def _parse_command(args: argparse.Namespace) -> None:
     tracker = None
     if args.diff_old_report is not None:
         old_report = cast(ErrorSummary, _load_json_file(args.diff_old_report))
-        change_report_writer = DefaultChangeReportWriter()
+        change_report_writer: _ChangeReportWriter
+        if args.color:
+            change_report_writer = ColorChangeReportWriter()
+        else:
+            change_report_writer = DefaultChangeReportWriter()
         tracker = ChangeTracker(old_report, report_writer=change_report_writer)
         processors.append(tracker)
 
