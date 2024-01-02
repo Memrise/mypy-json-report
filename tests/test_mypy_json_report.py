@@ -12,13 +12,6 @@ from mypy_json_report import (
 )
 
 
-EXAMPLE_MYPY_STDOUT = """\
-mypy_json_report.py:8: error: Function is missing a return type annotation
-mypy_json_report.py:8: note: Use "-> None" if function does not return a value
-mypy_json_report.py:68: error: Call to untyped function "main" in typed context
-Found 2 errors in 1 file (checked 3 source files)"""
-
-
 class TestMypyMessageFromLine:
     def test_error(self) -> None:
         line = "test.py:8: error: Function is missing a return type annotation\n"
