@@ -248,6 +248,81 @@ class DefaultChangeReportWriter:
         self.write(f"Total errors: {diff.total_errors}\n")
 
 
+class ColorChangeReportWriter:
+    """
+    Writes an error summary in color.
+
+    Inspired by the FancyFormatter in mypy.util.
+
+    Ref: https://github.com/python/mypy/blob/f9e8e0bda5cfbb54d6a8f9e482aa25da28a1a635/mypy/util.py#L761
+    """
+
+    _RESET = "\033[0m"
+    _BOLD = "\033[1m"
+    _BOLD_RED = "\033[31;1m"
+    _BOLD_YELLOW = "\033[33;1m"
+    _GREEN = "\033[32m"
+    _YELLOW = "\033[33m"
+    _BLUE = "\033[34m"
+
+    def __init__(self, _write: Callable[[str], Any] = sys.stdout.write) -> None:
+        self.write = _write
+
+    def write_report(self, diff: DiffReport) -> None:
+        new_errors = "\n".join([self._format_line(line) for line in diff.error_lines])
+        self.write(new_errors + "\n")
+
+        fixed_color = self._BOLD_YELLOW if diff.num_fixed_errors else self._GREEN
+        error_color = self._BOLD_RED if diff.num_new_errors else self._GREEN
+
+        self.write(self._style(fixed_color, f"Fixed errors: {diff.num_fixed_errors}\n"))
+        self.write(self._style(error_color, f"New errors: {diff.num_new_errors}\n"))
+        self.write(self._style(self._BOLD, f"Total errors: {diff.total_errors}\n"))
+
+    def _style(self, style: str, message: str) -> str:
+        return f"{style}{message}{self._RESET}"
+
+    def _highlight_quotes(self, msg: str) -> str:
+        if msg.count('"') % 2:
+            return msg
+        parts = msg.split('"')
+        out = ""
+        for i, part in enumerate(parts):
+            if i % 2 == 0:
+                out += part
+            else:
+                out += self._style(self._BOLD, f'"{part}"')
+        return out
+
+    def _format_line(self, line: str) -> str:
+        if ": error: " in line:
+            # Separate the location from the message.
+            location, _, message = line.partition(" error: ")
+
+            # Extract the error code from the end of the message if it's there.
+            if message.endswith("]") and "  [" in message:
+                error_msg, _, code = message.rpartition("  [")
+                code = self._style(self._YELLOW, f"  [{code}")
+            else:
+                error_msg = message
+                code = ""
+
+            return (
+                location
+                + self._style(self._BOLD_RED, " error: ")
+                + self._highlight_quotes(error_msg)
+                + code
+            )
+        if ": note: " in line:
+            location, _, message = line.partition(" note: ")
+            return (
+                location
+                + self._style(self._BLUE, " note: ")
+                + self._highlight_quotes(message)
+            )
+        return line
+
+
 class ChangeTracker:
     """
     Compares the current Mypy report against a previous summary.

@@ -6,6 +6,7 @@ import pytest
 
 from mypy_json_report import (
     ChangeTracker,
+    ColorChangeReportWriter,
     DefaultChangeReportWriter,
     DiffReport,
     ErrorCounter,
@@ -356,4 +357,127 @@ class TestDefaultChangeReportWriter:
             "Fixed errors: 0\n",
             "New errors: 1\n",
             "Total errors: 2\n",
+        ]
+
+
+class TestColorChangeReportWriter:
+    def test_no_errors(self) -> None:
+        messages: List[str] = []
+        writer = ColorChangeReportWriter(_write=messages.append)
+
+        writer.write_report(
+            DiffReport(
+                error_lines=[], total_errors=0, num_new_errors=0, num_fixed_errors=0
+            )
+        )
+
+        assert messages == [
+            "\n",
+            "\x1b[32mFixed errors: 0\n\x1b[0m",
+            "\x1b[32mNew errors: 0\n\x1b[0m",
+            "\x1b[1mTotal errors: 0\n\x1b[0m",
+        ]
+
+    def test_with_error(self) -> None:
+        messages: List[str] = []
+        writer = ColorChangeReportWriter(_write=messages.append)
+
+        writer.write_report(
+            DiffReport(
+                error_lines=["file.py:8: error: An example type error"],
+                total_errors=2,
+                num_new_errors=1,
+                num_fixed_errors=1,
+            )
+        )
+
+        assert messages == [
+            "file.py:8:\x1b[31;1m error: \x1b[0mAn example type error\n",
+            "\x1b[33;1mFixed errors: 1\n\x1b[0m",
+            "\x1b[31;1mNew errors: 1\n\x1b[0m",
+            "\x1b[1mTotal errors: 2\n\x1b[0m",
+        ]
+
+    def test_with_error_containing_braces(self) -> None:
+        messages: List[str] = []
+        writer = ColorChangeReportWriter(_write=messages.append)
+
+        writer.write_report(
+            DiffReport(
+                error_lines=[
+                    "file.py:8: error: Contains  [braces]  but not an error code"
+                ],
+                total_errors=2,
+                num_new_errors=1,
+                num_fixed_errors=1,
+            )
+        )
+
+        assert messages == [
+            "file.py:8:\x1b[31;1m error: \x1b[0mContains  [braces]  but not an error code\n",
+            "\x1b[33;1mFixed errors: 1\n\x1b[0m",
+            "\x1b[31;1mNew errors: 1\n\x1b[0m",
+            "\x1b[1mTotal errors: 2\n\x1b[0m",
+        ]
+
+    def test_unclosed_error_code(self) -> None:
+        messages: List[str] = []
+        writer = ColorChangeReportWriter(_write=messages.append)
+
+        writer.write_report(
+            DiffReport(
+                error_lines=[
+                    "file.py:8: error: Resembles error code but  [is-not-closed"
+                ],
+                total_errors=2,
+                num_new_errors=1,
+                num_fixed_errors=1,
+            )
+        )
+
+        assert messages == [
+            "file.py:8:\x1b[31;1m error: \x1b[0mResembles error code but  [is-not-closed\n",
+            "\x1b[33;1mFixed errors: 1\n\x1b[0m",
+            "\x1b[31;1mNew errors: 1\n\x1b[0m",
+            "\x1b[1mTotal errors: 2\n\x1b[0m",
+        ]
+
+    def test_with_error_with_code(self) -> None:
+        messages: List[str] = []
+        writer = ColorChangeReportWriter(_write=messages.append)
+
+        writer.write_report(
+            DiffReport(
+                error_lines=["file.py:8: error: An example type error  [error-code]"],
+                total_errors=2,
+                num_new_errors=1,
+                num_fixed_errors=0,
+            )
+        )
+
+        assert messages == [
+            "file.py:8:\x1b[31;1m error: \x1b[0mAn example type error\x1b[33m  [error-code]\x1b[0m\n",
+            "\x1b[32mFixed errors: 0\n\x1b[0m",
+            "\x1b[31;1mNew errors: 1\n\x1b[0m",
+            "\x1b[1mTotal errors: 2\n\x1b[0m",
+        ]
+
+    def test_with_note(self) -> None:
+        messages: List[str] = []
+        writer = ColorChangeReportWriter(_write=messages.append)
+
+        writer.write_report(
+            DiffReport(
+                error_lines=["file.py:8: note: An example note"],
+                total_errors=2,
+                num_new_errors=1,
+                num_fixed_errors=1,
+            )
+        )
+
+        assert messages == [
+            "file.py:8:\x1b[34m note: \x1b[0mAn example note\n",
+            "\x1b[33;1mFixed errors: 1\n\x1b[0m",
+            "\x1b[31;1mNew errors: 1\n\x1b[0m",
+            "\x1b[1mTotal errors: 2\n\x1b[0m",
         ]
