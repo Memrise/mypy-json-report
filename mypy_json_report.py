@@ -248,6 +248,8 @@ class _ChangeReportWriter(Protocol):
 
 
 class DefaultChangeReportWriter:
+    """Writes an error summary without color."""
+
     def __init__(self, _write: Callable[[str], Any] = sys.stdout.write) -> None:
         self.write = _write
 
