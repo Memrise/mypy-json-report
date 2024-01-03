@@ -255,7 +255,8 @@ class DefaultChangeReportWriter:
 
     def write_report(self, diff: DiffReport) -> None:
         new_errors = "\n".join(diff.error_lines)
-        self.write(new_errors + "\n")
+        if new_errors:
+            self.write(new_errors + "\n\n")
         self.write(f"Fixed errors: {diff.num_fixed_errors}\n")
         self.write(f"New errors: {diff.num_new_errors}\n")
         self.write(f"Total errors: {diff.total_errors}\n")
@@ -283,7 +284,8 @@ class ColorChangeReportWriter:
 
     def write_report(self, diff: DiffReport) -> None:
         new_errors = "\n".join([self._format_line(line) for line in diff.error_lines])
-        self.write(new_errors + "\n")
+        if new_errors:
+            self.write(new_errors + "\n\n")
 
         fixed_color = self._BOLD_YELLOW if diff.num_fixed_errors else self._GREEN
         error_color = self._BOLD_RED if diff.num_new_errors else self._GREEN

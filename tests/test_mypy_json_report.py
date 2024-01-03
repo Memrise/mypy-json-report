@@ -332,12 +332,7 @@ class TestDefaultChangeReportWriter:
             )
         )
 
-        assert messages == [
-            "\n",
-            "Fixed errors: 0\n",
-            "New errors: 0\n",
-            "Total errors: 0\n",
-        ]
+        assert messages == ["Fixed errors: 0\n", "New errors: 0\n", "Total errors: 0\n"]
 
     def test_with_errors(self) -> None:
         messages: List[str] = []
@@ -353,7 +348,7 @@ class TestDefaultChangeReportWriter:
         )
 
         assert messages == [
-            "file.py:8: error: An example type error\n",
+            "file.py:8: error: An example type error\n\n",
             "Fixed errors: 0\n",
             "New errors: 1\n",
             "Total errors: 2\n",
@@ -372,7 +367,6 @@ class TestColorChangeReportWriter:
         )
 
         assert messages == [
-            "\n",
             "\x1b[32mFixed errors: 0\n\x1b[0m",
             "\x1b[32mNew errors: 0\n\x1b[0m",
             "\x1b[1mTotal errors: 0\n\x1b[0m",
@@ -392,7 +386,7 @@ class TestColorChangeReportWriter:
         )
 
         assert messages == [
-            "file.py:8:\x1b[31;1m error: \x1b[0mAn example type error\n",
+            "file.py:8:\x1b[31;1m error: \x1b[0mAn example type error\n\n",
             "\x1b[33;1mFixed errors: 1\n\x1b[0m",
             "\x1b[31;1mNew errors: 1\n\x1b[0m",
             "\x1b[1mTotal errors: 2\n\x1b[0m",
@@ -414,7 +408,7 @@ class TestColorChangeReportWriter:
         )
 
         assert messages == [
-            "file.py:8:\x1b[31;1m error: \x1b[0mContains  [braces]  but not an error code\n",
+            "file.py:8:\x1b[31;1m error: \x1b[0mContains  [braces]  but not an error code\n\n",
             "\x1b[33;1mFixed errors: 1\n\x1b[0m",
             "\x1b[31;1mNew errors: 1\n\x1b[0m",
             "\x1b[1mTotal errors: 2\n\x1b[0m",
@@ -436,7 +430,7 @@ class TestColorChangeReportWriter:
         )
 
         assert messages == [
-            "file.py:8:\x1b[31;1m error: \x1b[0mResembles error code but  [is-not-closed\n",
+            "file.py:8:\x1b[31;1m error: \x1b[0mResembles error code but  [is-not-closed\n\n",
             "\x1b[33;1mFixed errors: 1\n\x1b[0m",
             "\x1b[31;1mNew errors: 1\n\x1b[0m",
             "\x1b[1mTotal errors: 2\n\x1b[0m",
@@ -456,7 +450,7 @@ class TestColorChangeReportWriter:
         )
 
         assert messages == [
-            "file.py:8:\x1b[31;1m error: \x1b[0mAn example type error\x1b[33m  [error-code]\x1b[0m\n",
+            "file.py:8:\x1b[31;1m error: \x1b[0mAn example type error\x1b[33m  [error-code]\x1b[0m\n\n",
             "\x1b[32mFixed errors: 0\n\x1b[0m",
             "\x1b[31;1mNew errors: 1\n\x1b[0m",
             "\x1b[1mTotal errors: 2\n\x1b[0m",
@@ -476,7 +470,7 @@ class TestColorChangeReportWriter:
         )
 
         assert messages == [
-            "file.py:8:\x1b[34m note: \x1b[0mAn example note\n",
+            "file.py:8:\x1b[34m note: \x1b[0mAn example note\n\n",
             "\x1b[33;1mFixed errors: 1\n\x1b[0m",
             "\x1b[31;1mNew errors: 1\n\x1b[0m",
             "\x1b[1mTotal errors: 2\n\x1b[0m",
