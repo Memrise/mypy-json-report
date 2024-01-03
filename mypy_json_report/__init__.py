@@ -37,7 +37,7 @@ from typing import (
 )
 
 
-class ErrorCodes(enum.IntEnum):
+class ExitCode(enum.IntEnum):
     # 1 is returned when an uncaught exception is raised.
     # Argparse returns 2 when bad args are passed.
     ERROR_DIFF = 3
@@ -80,7 +80,7 @@ def main() -> None:
         help=textwrap.dedent(
             f"""\
             An old report to compare against. We will compare the errors in there to the new report.
-            Fail with return code {ErrorCodes.ERROR_DIFF} if we discover any new errors.
+            Fail with return code {ExitCode.ERROR_DIFF} if we discover any new errors.
             New errors will be printed to stderr.
             Similar errors from the same file will also be printed
             (because we don't know which error is the new one).
@@ -159,7 +159,7 @@ def _no_command(args: argparse.Namespace) -> None:
     This will be hit when the program is called without arguments.
     """
     print("A subcommand is required. Pass --help for usage info.", file=sys.stderr)
-    sys.exit(ErrorCodes.DEPRECATED)
+    sys.exit(ExitCode.DEPRECATED)
 
 
 class ParseError(Exception):
@@ -393,12 +393,12 @@ class ChangeTracker:
             num_fixed_errors=self.num_fixed_errors + unseen_errors,
         )
 
-    def write_report(self) -> Optional[ErrorCodes]:
+    def write_report(self) -> Optional[ExitCode]:
         diff = self.diff_report()
         self.report_writer.write_report(diff)
 
         if diff.num_new_errors or diff.num_fixed_errors:
-            return ErrorCodes.ERROR_DIFF
+            return ExitCode.ERROR_DIFF
         return None
 
 
