@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import argparse
-import enum
 import itertools
 import json
 import operator
@@ -35,13 +34,7 @@ from typing import (
     cast,
 )
 
-
-class ExitCode(enum.IntEnum):
-    SUCCESS = 0
-    # 1 is returned when an uncaught exception is raised.
-    # Argparse returns 2 when bad args are passed.
-    ERROR_DIFF = 3
-    DEPRECATED = 4
+from .exit_codes import ExitCode
 
 
 def main() -> None:
