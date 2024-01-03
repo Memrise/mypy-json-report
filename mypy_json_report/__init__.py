@@ -30,7 +30,6 @@ from typing import (
     Iterator,
     List,
     Protocol,
-    Union,
     cast,
 )
 
@@ -103,13 +102,21 @@ def _load_json_file(filepath: pathlib.Path) -> Any:
         return json.load(json_file)
 
 
+class MessageProcessor(Protocol):
+    def process_messages(self, filename: str, messages: List["MypyMessage"]) -> None:
+        ...
+
+    def write_report(self) -> ExitCode:
+        ...
+
+
 def _parse_command(args: argparse.Namespace) -> None:
     """Handle the `parse` command."""
     if args.output_file:
         report_writer = args.output_file.write_text
     else:
         report_writer = sys.stdout.write
-    processors: List[Union[ErrorCounter, ChangeTracker]] = [
+    processors: List[MessageProcessor] = [
         ErrorCounter(report_writer=report_writer, indentation=args.indentation)
     ]
 
