@@ -132,7 +132,14 @@ def _parse_command(args: argparse.Namespace) -> None:
         tracker = ChangeTracker(old_report, report_writer=change_report_writer)
         processors.append(tracker)
 
-    messages = MypyMessage.from_lines(sys.stdin)
+    exit_code = parse_message_lines(processors, sys.stdin)
+    sys.exit(exit_code)
+
+
+def parse_message_lines(
+    processors: List[MessageProcessor], lines: Iterable[str]
+) -> ExitCode:
+    messages = MypyMessage.from_lines(lines)
 
     # Sort the lines by the filename otherwise itertools.groupby() will make
     # multiple groups for the same file name if the lines are out of order.
@@ -149,9 +156,9 @@ def _parse_command(args: argparse.Namespace) -> None:
     for processor in processors:
         exit_code = processor.write_report()
         if exit_code is not ExitCode.SUCCESS:
-            sys.exit(exit_code)
+            return exit_code
 
-    sys.exit(ExitCode.SUCCESS)
+    return ExitCode.SUCCESS
 
 
 def _no_command(args: argparse.Namespace) -> None:
