@@ -30,7 +30,6 @@ from typing import (
     Iterable,
     Iterator,
     List,
-    Optional,
     Protocol,
     Union,
     cast,
@@ -38,6 +37,7 @@ from typing import (
 
 
 class ExitCode(enum.IntEnum):
+    SUCCESS = 0
     # 1 is returned when an uncaught exception is raised.
     # Argparse returns 2 when bad args are passed.
     ERROR_DIFF = 3
@@ -148,8 +148,10 @@ def _parse_command(args: argparse.Namespace) -> None:
 
     for processor in processors:
         error_code = processor.write_report()
-        if error_code is not None:
+        if error_code is not ExitCode.SUCCESS:
             sys.exit(error_code)
+
+    sys.exit(ExitCode.SUCCESS)
 
 
 def _no_command(args: argparse.Namespace) -> None:
@@ -228,10 +230,11 @@ class ErrorCounter:
         if counted_errors:
             self.grouped_errors[filename] = counted_errors
 
-    def write_report(self) -> None:
+    def write_report(self) -> ExitCode:
         errors = self.grouped_errors
         error_json = json.dumps(errors, sort_keys=True, indent=self.indentation)
         self.report_writer(error_json + "\n")
+        return ExitCode.SUCCESS
 
 
 @dataclass(frozen=True)
@@ -393,13 +396,13 @@ class ChangeTracker:
             num_fixed_errors=self.num_fixed_errors + unseen_errors,
         )
 
-    def write_report(self) -> Optional[ExitCode]:
+    def write_report(self) -> ExitCode:
         diff = self.diff_report()
         self.report_writer.write_report(diff)
 
         if diff.num_new_errors or diff.num_fixed_errors:
             return ExitCode.ERROR_DIFF
-        return None
+        return ExitCode.SUCCESS
 
 
 if __name__ == "__main__":
