@@ -140,9 +140,9 @@ def _parse_command(args: argparse.Namespace) -> None:
             processor.process_messages(filename, message_group)
 
     for processor in processors:
-        error_code = processor.write_report()
-        if error_code is not ExitCode.SUCCESS:
-            sys.exit(error_code)
+        exit_code = processor.write_report()
+        if exit_code is not ExitCode.SUCCESS:
+            sys.exit(exit_code)
 
     sys.exit(ExitCode.SUCCESS)
 
