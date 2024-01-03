@@ -1,22 +1,18 @@
 import sys
+from typing import List
 from unittest import mock
 
 import pytest
 
 from mypy_json_report import (
     ChangeTracker,
+    ColorChangeReportWriter,
+    DefaultChangeReportWriter,
     DiffReport,
     ErrorCounter,
     MypyMessage,
     ParseError,
 )
-
-
-EXAMPLE_MYPY_STDOUT = """\
-mypy_json_report.py:8: error: Function is missing a return type annotation
-mypy_json_report.py:8: note: Use "-> None" if function does not return a value
-mypy_json_report.py:68: error: Call to untyped function "main" in typed context
-Found 2 errors in 1 file (checked 3 source files)"""
 
 
 class TestMypyMessageFromLine:
@@ -141,7 +137,7 @@ class TestErrorCounter:
 
 class TestChangeTracker:
     def test_no_errors(self) -> None:
-        tracker = ChangeTracker(summary={})
+        tracker = ChangeTracker(summary={}, report_writer=mock.MagicMock())
 
         report = tracker.diff_report()
 
@@ -150,7 +146,7 @@ class TestChangeTracker:
         )
 
     def test_new_error(self) -> None:
-        tracker = ChangeTracker(summary={})
+        tracker = ChangeTracker(summary={}, report_writer=mock.MagicMock())
         tracker.process_messages(
             "file.py",
             [MypyMessage.from_line("file.py:8: error: An example type error")],
@@ -166,7 +162,10 @@ class TestChangeTracker:
         )
 
     def test_known_error(self) -> None:
-        tracker = ChangeTracker(summary={"file.py": {"An example type error": 1}})
+        tracker = ChangeTracker(
+            summary={"file.py": {"An example type error": 1}},
+            report_writer=mock.MagicMock(),
+        )
         tracker.process_messages(
             "file.py",
             [MypyMessage.from_line("file.py:8: error: An example type error")],
@@ -179,7 +178,10 @@ class TestChangeTracker:
         )
 
     def test_error_completely_fixed(self) -> None:
-        tracker = ChangeTracker(summary={"file.py": {"An example type error": 2}})
+        tracker = ChangeTracker(
+            summary={"file.py": {"An example type error": 2}},
+            report_writer=mock.MagicMock(),
+        )
 
         report = tracker.diff_report()
 
@@ -188,7 +190,10 @@ class TestChangeTracker:
         )
 
     def test_error_partially_fixed(self) -> None:
-        tracker = ChangeTracker(summary={"file.py": {"An example type error": 2}})
+        tracker = ChangeTracker(
+            summary={"file.py": {"An example type error": 2}},
+            report_writer=mock.MagicMock(),
+        )
         tracker.process_messages(
             "file.py",
             [MypyMessage.from_line("file.py:8: error: An example type error")],
@@ -201,7 +206,10 @@ class TestChangeTracker:
         )
 
     def test_more_errors_of_same_type(self) -> None:
-        tracker = ChangeTracker(summary={"file.py": {"An example type error": 1}})
+        tracker = ChangeTracker(
+            summary={"file.py": {"An example type error": 1}},
+            report_writer=mock.MagicMock(),
+        )
         tracker.process_messages(
             "file.py",
             [
@@ -225,7 +233,7 @@ class TestChangeTracker:
         )
 
     def test_note_on_same_line(self) -> None:
-        tracker = ChangeTracker(summary={})
+        tracker = ChangeTracker(summary={}, report_writer=mock.MagicMock())
         tracker.process_messages(
             "file.py",
             [
@@ -247,7 +255,10 @@ class TestChangeTracker:
         )
 
     def test_error_in_new_file(self) -> None:
-        tracker = ChangeTracker(summary={"file.py": {"An example type error": 1}})
+        tracker = ChangeTracker(
+            summary={"file.py": {"An example type error": 1}},
+            report_writer=mock.MagicMock(),
+        )
         tracker.process_messages(
             "file.py",
             [MypyMessage.from_line("file.py:1: error: An example type error")],
@@ -267,7 +278,7 @@ class TestChangeTracker:
         )
 
     def test_multiple_errors_on_same_line(self) -> None:
-        tracker = ChangeTracker(summary={})
+        tracker = ChangeTracker(summary={}, report_writer=mock.MagicMock())
         tracker.process_messages(
             "file.py",
             [
@@ -287,3 +298,180 @@ class TestChangeTracker:
             num_new_errors=2,
             num_fixed_errors=0,
         )
+
+
+class TestChangeTrackerPrinting:
+    def test_delegates_to_report_writer(self) -> None:
+        writer = mock.MagicMock()
+        tracker = ChangeTracker(summary={}, report_writer=writer)
+        tracker.process_messages(
+            "file.py",
+            [MypyMessage.from_line("file.py:8: error: An example type error")],
+        )
+
+        tracker.write_report()
+
+        writer.write_report.assert_called_once_with(
+            DiffReport(
+                error_lines=["file.py:8: error: An example type error"],
+                total_errors=1,
+                num_new_errors=1,
+                num_fixed_errors=0,
+            )
+        )
+
+
+class TestDefaultChangeReportWriter:
+    def test_no_errors(self) -> None:
+        messages: List[str] = []
+        writer = DefaultChangeReportWriter(_write=messages.append)
+
+        writer.write_report(
+            DiffReport(
+                error_lines=[], total_errors=0, num_new_errors=0, num_fixed_errors=0
+            )
+        )
+
+        assert messages == ["Fixed errors: 0\n", "New errors: 0\n", "Total errors: 0\n"]
+
+    def test_with_errors(self) -> None:
+        messages: List[str] = []
+        writer = DefaultChangeReportWriter(_write=messages.append)
+
+        writer.write_report(
+            DiffReport(
+                error_lines=["file.py:8: error: An example type error"],
+                total_errors=2,
+                num_new_errors=1,
+                num_fixed_errors=0,
+            )
+        )
+
+        assert messages == [
+            "file.py:8: error: An example type error\n\n",
+            "Fixed errors: 0\n",
+            "New errors: 1\n",
+            "Total errors: 2\n",
+        ]
+
+
+class TestColorChangeReportWriter:
+    def test_no_errors(self) -> None:
+        messages: List[str] = []
+        writer = ColorChangeReportWriter(_write=messages.append)
+
+        writer.write_report(
+            DiffReport(
+                error_lines=[], total_errors=0, num_new_errors=0, num_fixed_errors=0
+            )
+        )
+
+        assert messages == [
+            "\x1b[32mFixed errors: 0\n\x1b[0m",
+            "\x1b[32mNew errors: 0\n\x1b[0m",
+            "\x1b[1mTotal errors: 0\n\x1b[0m",
+        ]
+
+    def test_with_error(self) -> None:
+        messages: List[str] = []
+        writer = ColorChangeReportWriter(_write=messages.append)
+
+        writer.write_report(
+            DiffReport(
+                error_lines=["file.py:8: error: An example type error"],
+                total_errors=2,
+                num_new_errors=1,
+                num_fixed_errors=1,
+            )
+        )
+
+        assert messages == [
+            "file.py:8:\x1b[31;1m error: \x1b[0mAn example type error\n\n",
+            "\x1b[33;1mFixed errors: 1\n\x1b[0m",
+            "\x1b[31;1mNew errors: 1\n\x1b[0m",
+            "\x1b[1mTotal errors: 2\n\x1b[0m",
+        ]
+
+    def test_with_error_containing_braces(self) -> None:
+        messages: List[str] = []
+        writer = ColorChangeReportWriter(_write=messages.append)
+
+        writer.write_report(
+            DiffReport(
+                error_lines=[
+                    "file.py:8: error: Contains  [braces]  but not an error code"
+                ],
+                total_errors=2,
+                num_new_errors=1,
+                num_fixed_errors=1,
+            )
+        )
+
+        assert messages == [
+            "file.py:8:\x1b[31;1m error: \x1b[0mContains  [braces]  but not an error code\n\n",
+            "\x1b[33;1mFixed errors: 1\n\x1b[0m",
+            "\x1b[31;1mNew errors: 1\n\x1b[0m",
+            "\x1b[1mTotal errors: 2\n\x1b[0m",
+        ]
+
+    def test_unclosed_error_code(self) -> None:
+        messages: List[str] = []
+        writer = ColorChangeReportWriter(_write=messages.append)
+
+        writer.write_report(
+            DiffReport(
+                error_lines=[
+                    "file.py:8: error: Resembles error code but  [is-not-closed"
+                ],
+                total_errors=2,
+                num_new_errors=1,
+                num_fixed_errors=1,
+            )
+        )
+
+        assert messages == [
+            "file.py:8:\x1b[31;1m error: \x1b[0mResembles error code but  [is-not-closed\n\n",
+            "\x1b[33;1mFixed errors: 1\n\x1b[0m",
+            "\x1b[31;1mNew errors: 1\n\x1b[0m",
+            "\x1b[1mTotal errors: 2\n\x1b[0m",
+        ]
+
+    def test_with_error_with_code(self) -> None:
+        messages: List[str] = []
+        writer = ColorChangeReportWriter(_write=messages.append)
+
+        writer.write_report(
+            DiffReport(
+                error_lines=["file.py:8: error: An example type error  [error-code]"],
+                total_errors=2,
+                num_new_errors=1,
+                num_fixed_errors=0,
+            )
+        )
+
+        assert messages == [
+            "file.py:8:\x1b[31;1m error: \x1b[0mAn example type error\x1b[33m  [error-code]\x1b[0m\n\n",
+            "\x1b[32mFixed errors: 0\n\x1b[0m",
+            "\x1b[31;1mNew errors: 1\n\x1b[0m",
+            "\x1b[1mTotal errors: 2\n\x1b[0m",
+        ]
+
+    def test_with_note(self) -> None:
+        messages: List[str] = []
+        writer = ColorChangeReportWriter(_write=messages.append)
+
+        writer.write_report(
+            DiffReport(
+                error_lines=["file.py:8: note: An example note"],
+                total_errors=2,
+                num_new_errors=1,
+                num_fixed_errors=1,
+            )
+        )
+
+        assert messages == [
+            "file.py:8:\x1b[34m note: \x1b[0mAn example note\n\n",
+            "\x1b[33;1mFixed errors: 1\n\x1b[0m",
+            "\x1b[31;1mNew errors: 1\n\x1b[0m",
+            "\x1b[1mTotal errors: 2\n\x1b[0m",
+        ]

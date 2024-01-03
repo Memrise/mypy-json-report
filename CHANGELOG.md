@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Drop support for Python 3.7
+- Add `parse --color` flag for printing out change reports in color. (Aliases `-c`, `--colour`.)
 
 ## v1.0.4 [2023-05-09]
 
