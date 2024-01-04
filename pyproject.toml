@@ -34,7 +34,7 @@ tox = "*"
 tox-gh-actions = "*"
 
 [tool.poetry.scripts]
-mypy-json-report = "mypy_json_report:main"
+mypy-json-report = "mypy_json_report.cli:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
