@@ -18,6 +18,8 @@ import enum
 class ExitCode(enum.IntEnum):
     SUCCESS = 0
     # 1 is returned when an uncaught exception is raised.
+    UNCAUGHT_EXCEPTION = 1
     # Argparse returns 2 when bad args are passed.
+    ARGUMENT_PARSING_ERROR = 2
     ERROR_DIFF = 3
     DEPRECATED = 4
