@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-from mypy_json_report import (
+from mypy_json_report.parse import (
     ChangeTracker,
     ColorChangeReportWriter,
     DefaultChangeReportWriter,

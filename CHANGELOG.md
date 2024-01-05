@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Restructure project to use sub-packages, rather than putting all code in one module.
+
 ## v1.1.0 [2024-01-03]
 
 - Drop support for Python 3.7

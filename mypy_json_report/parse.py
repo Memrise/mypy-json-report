@@ -12,14 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import argparse
-import enum
 import itertools
 import json
 import operator
-import pathlib
 import sys
-import textwrap
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from typing import (
@@ -30,109 +26,27 @@ from typing import (
     Iterable,
     Iterator,
     List,
-    Optional,
     Protocol,
-    Union,
-    cast,
 )
 
-
-class ErrorCodes(enum.IntEnum):
-    # 1 is returned when an uncaught exception is raised.
-    # Argparse returns 2 when bad args are passed.
-    ERROR_DIFF = 3
-    DEPRECATED = 4
-
-
-def main() -> None:
-    """
-    The primary entrypoint of the program.
-
-    Parses the CLI flags, and delegates to other functions as appropriate.
-    For details of how to invoke the program, call it with `--help`.
-    """
-    parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(title="subcommand")
-
-    parser.set_defaults(func=_no_command)
-
-    parse_parser = subparsers.add_parser(
-        "parse", help="Transform Mypy output into JSON."
-    )
-    parse_parser.add_argument(
-        "-i",
-        "--indentation",
-        type=int,
-        default=2,
-        help="Number of spaces to indent JSON output.",
-    )
-    parse_parser.add_argument(
-        "-o",
-        "--output-file",
-        type=pathlib.Path,
-        help="The file to write the JSON report to. If omitted, the report will be written to STDOUT.",
-    )
-    parse_parser.add_argument(
-        "-d",
-        "--diff-old-report",
-        default=None,
-        type=pathlib.Path,
-        help=textwrap.dedent(
-            f"""\
-            An old report to compare against. We will compare the errors in there to the new report.
-            Fail with return code {ErrorCodes.ERROR_DIFF} if we discover any new errors.
-            New errors will be printed to stderr.
-            Similar errors from the same file will also be printed
-            (because we don't know which error is the new one).
-            For completeness other hints and errors on the same lines are also printed.
-            """
-        ),
-    )
-    parse_parser.add_argument(
-        "-c",
-        "--color",
-        "--colour",
-        action="store_true",
-        help="Whether to colorize the diff-report output. Defaults to False.",
-    )
-
-    parse_parser.set_defaults(func=_parse_command)
-
-    parsed = parser.parse_args()
-    parsed.func(parsed)
+from mypy_json_report.exit_codes import ExitCode
 
 
 ErrorSummary = Dict[str, Dict[str, int]]
 
 
-def _load_json_file(filepath: pathlib.Path) -> Any:
-    with filepath.open() as json_file:
-        return json.load(json_file)
+class MessageProcessor(Protocol):
+    def process_messages(self, filename: str, messages: List["MypyMessage"]) -> None:
+        ...
+
+    def write_report(self) -> ExitCode:
+        ...
 
 
-def _parse_command(args: argparse.Namespace) -> None:
-    """Handle the `parse` command."""
-    if args.output_file:
-        report_writer = args.output_file.write_text
-    else:
-        report_writer = sys.stdout.write
-    processors: List[Union[ErrorCounter, ChangeTracker]] = [
-        ErrorCounter(report_writer=report_writer, indentation=args.indentation)
-    ]
-
-    # If we have access to an old report, add the ChangeTracker processor.
-    tracker = None
-    if args.diff_old_report is not None:
-        old_report = cast(ErrorSummary, _load_json_file(args.diff_old_report))
-        change_report_writer: _ChangeReportWriter
-        if args.color:
-            change_report_writer = ColorChangeReportWriter()
-        else:
-            change_report_writer = DefaultChangeReportWriter()
-        tracker = ChangeTracker(old_report, report_writer=change_report_writer)
-        processors.append(tracker)
-
-    messages = MypyMessage.from_lines(sys.stdin)
+def parse_message_lines(
+    processors: List[MessageProcessor], lines: Iterable[str]
+) -> ExitCode:
+    messages = MypyMessage.from_lines(lines)
 
     # Sort the lines by the filename otherwise itertools.groupby() will make
     # multiple groups for the same file name if the lines are out of order.
@@ -147,19 +61,11 @@ def _parse_command(args: argparse.Namespace) -> None:
             processor.process_messages(filename, message_group)
 
     for processor in processors:
-        error_code = processor.write_report()
-        if error_code is not None:
-            sys.exit(error_code)
+        exit_code = processor.write_report()
+        if exit_code is not ExitCode.SUCCESS:
+            return exit_code
 
-
-def _no_command(args: argparse.Namespace) -> None:
-    """
-    Handle the lack of an explicit command.
-
-    This will be hit when the program is called without arguments.
-    """
-    print("A subcommand is required. Pass --help for usage info.", file=sys.stderr)
-    sys.exit(ErrorCodes.DEPRECATED)
+    return ExitCode.SUCCESS
 
 
 class ParseError(Exception):
@@ -228,10 +134,11 @@ class ErrorCounter:
         if counted_errors:
             self.grouped_errors[filename] = counted_errors
 
-    def write_report(self) -> None:
+    def write_report(self) -> ExitCode:
         errors = self.grouped_errors
         error_json = json.dumps(errors, sort_keys=True, indent=self.indentation)
         self.report_writer(error_json + "\n")
+        return ExitCode.SUCCESS
 
 
 @dataclass(frozen=True)
@@ -393,14 +300,10 @@ class ChangeTracker:
             num_fixed_errors=self.num_fixed_errors + unseen_errors,
         )
 
-    def write_report(self) -> Optional[ErrorCodes]:
+    def write_report(self) -> ExitCode:
         diff = self.diff_report()
         self.report_writer.write_report(diff)
 
         if diff.num_new_errors or diff.num_fixed_errors:
-            return ErrorCodes.ERROR_DIFF
-        return None
-
-
-if __name__ == "__main__":
-    main()
+            return ExitCode.ERROR_DIFF
+        return ExitCode.SUCCESS
