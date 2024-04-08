@@ -11,7 +11,7 @@ from mypy_json_report.parse import (
     DiffReport,
     ErrorCounter,
     MypyMessage,
-    ParseError,
+    SkipLineError,
 )
 
 
@@ -58,7 +58,7 @@ class TestMypyMessageFromLine:
     def test_summary_line(self) -> None:
         line = "Found 2 errors in 1 file (checked 3 source files)\n"
 
-        with pytest.raises(ParseError):
+        with pytest.raises(SkipLineError):
             MypyMessage.from_line(line)
 
     def test_multiple_lines(self) -> None:

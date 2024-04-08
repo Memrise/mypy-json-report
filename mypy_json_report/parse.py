@@ -68,7 +68,7 @@ def parse_message_lines(
     return ExitCode.SUCCESS
 
 
-class ParseError(Exception):
+class SkipLineError(Exception):
     pass
 
 
@@ -86,7 +86,7 @@ class MypyMessage:
         for line in lines:
             try:
                 yield MypyMessage.from_line(line)
-            except ParseError:
+            except SkipLineError:
                 continue
 
     @classmethod
@@ -96,7 +96,7 @@ class MypyMessage:
         except ValueError as e:
             # Expected to happen on summary lines.
             # We could avoid this by requiring --no-error-summary
-            raise ParseError from e
+            raise SkipLineError from e
         filename, line_number, *_ = location.split(":")
         return MypyMessage(
             filename=filename,
