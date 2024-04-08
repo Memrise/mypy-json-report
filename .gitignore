@@ -1,2 +1,3 @@
-dist
+dist/
 .tox/
+__pycache__/
