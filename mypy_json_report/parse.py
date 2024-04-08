@@ -68,6 +68,10 @@ def parse_message_lines(
     return ExitCode.SUCCESS
 
 
+class FilenameWithoutLineNumberError(Exception):
+    pass
+
+
 class SkipLineError(Exception):
     pass
 
@@ -97,7 +101,21 @@ class MypyMessage:
             # Expected to happen on summary lines.
             # We could avoid this by requiring --no-error-summary
             raise SkipLineError from e
-        filename, line_number, *_ = location.split(":")
+
+        try:
+            filename, line_number, *_ = location.split(":")
+        except ValueError:
+            # This happens if the line contains a filename but no line number.
+            # We don't have any good way of handling those error messages right now,
+            # and in most cases it's probably an indicator of mypy warning about a problem with the file as a whole.
+            # In these cases we want the parsing to stop and emit the line that couldn't be parsed.
+            raise FilenameWithoutLineNumberError(
+                "Error message from mypy contains a filename but no line number. "
+                "This is normally an indication of a file-level issue reported by mypy. "
+                "Please correct this and try again. The error emitted from mypy is:\n\n"
+                f"    {line.strip()}"
+            )
+
         return MypyMessage(
             filename=filename,
             line_number=int(line_number),
