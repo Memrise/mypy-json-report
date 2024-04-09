@@ -10,8 +10,9 @@ from mypy_json_report.parse import (
     DefaultChangeReportWriter,
     DiffReport,
     ErrorCounter,
+    FilenameWithoutLineNumberError,
     MypyMessage,
-    ParseError,
+    SkipLineError,
 )
 
 
@@ -58,7 +59,13 @@ class TestMypyMessageFromLine:
     def test_summary_line(self) -> None:
         line = "Found 2 errors in 1 file (checked 3 source files)\n"
 
-        with pytest.raises(ParseError):
+        with pytest.raises(SkipLineError):
+            MypyMessage.from_line(line)
+
+    def test_file_level_error(self) -> None:
+        line = "test.py: note: See https://mypy.readthedocs.io/en/stable/running_mypy.html#mapping-file-paths-to-modules for more info"
+
+        with pytest.raises(FilenameWithoutLineNumberError):
             MypyMessage.from_line(line)
 
     def test_multiple_lines(self) -> None:
