@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v1.2.0 [2024-04-09]
+
 - Restructure project to use sub-packages, rather than putting all code in one module.
 - Added explicit output in case mypy outputs an error referencing a specific file but doesn't include a line number.
 
