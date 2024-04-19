@@ -36,11 +36,11 @@ ErrorSummary = Dict[str, Dict[str, int]]
 
 
 class MessageProcessor(Protocol):
-    def process_messages(self, filename: str, messages: List["MypyMessage"]) -> None:
-        ...
+    def process_messages(
+        self, filename: str, messages: List["MypyMessage"]
+    ) -> None: ...
 
-    def write_report(self) -> ExitCode:
-        ...
+    def write_report(self) -> ExitCode: ...
 
 
 def parse_message_lines(
@@ -168,8 +168,7 @@ class DiffReport:
 
 
 class _ChangeReportWriter(Protocol):
-    def write_report(self, diff: DiffReport) -> None:
-        ...
+    def write_report(self, diff: DiffReport) -> None: ...
 
 
 class DefaultChangeReportWriter:
