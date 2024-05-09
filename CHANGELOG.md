@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add Python 3.13 to test matrix
+
 ## v1.2.0 [2024-04-09]
 
 - Restructure project to use sub-packages, rather than putting all code in one module.
