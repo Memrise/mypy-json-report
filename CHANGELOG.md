@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Add Python 3.13 to test matrix
+- Add Python 3.13 and 3.14 to test matrix
 
 ## v1.2.0 [2024-04-09]
 
