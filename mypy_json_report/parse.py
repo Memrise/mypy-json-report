@@ -17,34 +17,26 @@ import json
 import operator
 import sys
 from collections import Counter, defaultdict
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
-from typing import (
-    Any,
-    Callable,
-    Counter as CounterType,
-    Dict,
-    Iterable,
-    Iterator,
-    List,
-    Protocol,
-)
+from typing import Any, Callable, Protocol
 
 from mypy_json_report.exit_codes import ExitCode
 
 
-ErrorSummary = Dict[str, Dict[str, int]]
+ErrorSummary = dict[str, dict[str, int]]
 
 
 class MessageProcessor(Protocol):
     def process_messages(
-        self, filename: str, messages: List["MypyMessage"]
+        self, filename: str, messages: list["MypyMessage"]
     ) -> None: ...
 
     def write_report(self) -> ExitCode: ...
 
 
 def parse_message_lines(
-    processors: List[MessageProcessor], lines: Iterable[str]
+    processors: list[MessageProcessor], lines: Iterable[str]
 ) -> ExitCode:
     messages = MypyMessage.from_lines(lines)
 
@@ -146,7 +138,7 @@ class ErrorCounter:
         self.report_writer = report_writer
         self.indentation = indentation
 
-    def process_messages(self, filename: str, messages: List[MypyMessage]) -> None:
+    def process_messages(self, filename: str, messages: list[MypyMessage]) -> None:
         error_strings = (m.message for m in messages if m.message_type == "error")
         counted_errors = Counter(error_strings)
         if counted_errors:
@@ -161,7 +153,7 @@ class ErrorCounter:
 
 @dataclass(frozen=True)
 class DiffReport:
-    error_lines: List[str]
+    error_lines: list[str]
     total_errors: int
     num_new_errors: int
     num_fixed_errors: int
@@ -277,15 +269,15 @@ class ChangeTracker:
     ) -> None:
         self.old_report = summary
         self.report_writer = report_writer
-        self.error_lines: List[str] = []
+        self.error_lines: list[str] = []
         self.num_errors = 0
         self.num_new_errors = 0
         self.num_fixed_errors = 0
 
-    def process_messages(self, filename: str, messages: List[MypyMessage]) -> None:
-        error_frequencies: CounterType[str] = Counter()
-        messages_by_line_number: Dict[int, List[str]] = defaultdict(list)
-        line_numbers_by_error: Dict[str, List[int]] = defaultdict(list)
+    def process_messages(self, filename: str, messages: list[MypyMessage]) -> None:
+        error_frequencies: Counter[str] = Counter()
+        messages_by_line_number: dict[int, list[str]] = defaultdict(list)
+        line_numbers_by_error: dict[str, list[int]] = defaultdict(list)
 
         for message in messages:
             if message.message_type == "error":
@@ -294,9 +286,7 @@ class ChangeTracker:
                 line_numbers_by_error[message.message].append(message.line_number)
             messages_by_line_number[message.line_number].append(message.raw)
 
-        old_report_counter: CounterType[str] = Counter(
-            self.old_report.pop(filename, None)
-        )
+        old_report_counter: Counter[str] = Counter(self.old_report.pop(filename, None))
         new_errors_in_file = error_frequencies - old_report_counter
 
         self.num_new_errors += sum(new_errors_in_file.values())

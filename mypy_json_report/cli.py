@@ -17,7 +17,7 @@ import json
 import pathlib
 import sys
 import textwrap
-from typing import Any, List, cast
+from typing import Any, cast
 
 from . import parse
 from .exit_codes import ExitCode
@@ -92,7 +92,7 @@ def _parse_command(args: argparse.Namespace) -> None:
         report_writer = args.output_file.write_text
     else:
         report_writer = sys.stdout.write
-    processors: List[parse.MessageProcessor] = [
+    processors: list[parse.MessageProcessor] = [
         parse.ErrorCounter(report_writer=report_writer, indentation=args.indentation)
     ]
 
