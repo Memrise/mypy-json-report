@@ -1,5 +1,4 @@
 import sys
-from typing import List
 from unittest import mock
 
 import pytest
@@ -330,7 +329,7 @@ class TestChangeTrackerPrinting:
 
 class TestDefaultChangeReportWriter:
     def test_no_errors(self) -> None:
-        messages: List[str] = []
+        messages: list[str] = []
         writer = DefaultChangeReportWriter(_write=messages.append)
 
         writer.write_report(
@@ -342,7 +341,7 @@ class TestDefaultChangeReportWriter:
         assert messages == ["Fixed errors: 0\n", "New errors: 0\n", "Total errors: 0\n"]
 
     def test_with_errors(self) -> None:
-        messages: List[str] = []
+        messages: list[str] = []
         writer = DefaultChangeReportWriter(_write=messages.append)
 
         writer.write_report(
@@ -364,7 +363,7 @@ class TestDefaultChangeReportWriter:
 
 class TestColorChangeReportWriter:
     def test_no_errors(self) -> None:
-        messages: List[str] = []
+        messages: list[str] = []
         writer = ColorChangeReportWriter(_write=messages.append)
 
         writer.write_report(
@@ -380,7 +379,7 @@ class TestColorChangeReportWriter:
         ]
 
     def test_with_error(self) -> None:
-        messages: List[str] = []
+        messages: list[str] = []
         writer = ColorChangeReportWriter(_write=messages.append)
 
         writer.write_report(
@@ -400,7 +399,7 @@ class TestColorChangeReportWriter:
         ]
 
     def test_with_error_containing_braces(self) -> None:
-        messages: List[str] = []
+        messages: list[str] = []
         writer = ColorChangeReportWriter(_write=messages.append)
 
         writer.write_report(
@@ -422,7 +421,7 @@ class TestColorChangeReportWriter:
         ]
 
     def test_unclosed_error_code(self) -> None:
-        messages: List[str] = []
+        messages: list[str] = []
         writer = ColorChangeReportWriter(_write=messages.append)
 
         writer.write_report(
@@ -444,7 +443,7 @@ class TestColorChangeReportWriter:
         ]
 
     def test_with_error_with_code(self) -> None:
-        messages: List[str] = []
+        messages: list[str] = []
         writer = ColorChangeReportWriter(_write=messages.append)
 
         writer.write_report(
@@ -464,7 +463,7 @@ class TestColorChangeReportWriter:
         ]
 
     def test_with_note(self) -> None:
-        messages: List[str] = []
+        messages: list[str] = []
         writer = ColorChangeReportWriter(_write=messages.append)
 
         writer.write_report(
