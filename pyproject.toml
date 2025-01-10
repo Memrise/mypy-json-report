@@ -12,7 +12,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -27,7 +26,7 @@ classifiers = [
 Source = "https://github.com/memrise/mypy-json-report"
 
 [tool.poetry.dependencies]
-python = "~=3.8"
+python = "~=3.9"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "*"
@@ -43,7 +42,7 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py39"
 
 [tool.ruff.lint]
 select = [

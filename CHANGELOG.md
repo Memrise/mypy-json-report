@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Add Python 3.13 and 3.14 to test matrix
+- Drop support for Python 3.8
 
 ## v1.2.0 [2024-04-09]
 
