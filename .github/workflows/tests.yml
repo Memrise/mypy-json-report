@@ -29,9 +29,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Poetry
-        # Don't use Poetry 2 for now.
-        # It has breaking changes for how package metadata is defined.
-        run: pipx install "poetry < 2"
+        run: pipx install poetry
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
