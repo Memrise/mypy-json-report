@@ -1,8 +1,11 @@
-[tool.poetry]
+[project]
 name = "mypy-json-report"
 version = "1.2.0"
 description = "Generate a JSON report from your mypy output"
-authors = ["Charlie Denton <charlie@meshy.co.uk>"]
+authors = [
+    {name = "Charlie Denton", email = "charlie@meshy.co.uk"},
+    {name = "Jeppe Fihl-Pearson", email = "jeppe@tenzer.dk"},
+]
 license = "Apache-2.0"
 repository = "https://github.com/memrise/mypy-json-report"
 readme = "README.md"
@@ -21,12 +24,14 @@ classifiers = [
     "Topic :: Software Development",
     "Topic :: Utilities",
 ]
+requires-python = ">= 3.9"
+dependencies = []
 
 [project.urls]
 Source = "https://github.com/memrise/mypy-json-report"
 
-[tool.poetry.dependencies]
-python = "~=3.9"
+[project.scripts]
+mypy-json-report = "mypy_json_report.cli:main"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "*"
@@ -34,11 +39,8 @@ pytest = "*"
 tox = "*"
 tox-gh-actions = "*"
 
-[tool.poetry.scripts]
-mypy-json-report = "mypy_json_report.cli:main"
-
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=2.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
