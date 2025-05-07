@@ -1,6 +1,6 @@
 [project]
 name = "mypy-json-report"
-version = "1.2.0"
+version = "1.3.0"
 description = "Generate a JSON report from your mypy output"
 authors = [
     {name = "Charlie Denton", email = "charlie@meshy.co.uk"},

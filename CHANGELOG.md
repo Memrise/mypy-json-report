@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v1.3.0 [2025-05-07]
+
 - Add Python 3.13 and 3.14 to test matrix
 - Drop support for Python 3.8
 - Switch to use Poetry 2 for project management
