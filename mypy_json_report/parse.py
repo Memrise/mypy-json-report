@@ -17,9 +17,9 @@ import json
 import operator
 import sys
 from collections import Counter, defaultdict
-from collections.abc import Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 from dataclasses import dataclass
-from typing import Any, Callable, Protocol
+from typing import Any, Protocol
 
 from mypy_json_report.exit_codes import ExitCode
 
