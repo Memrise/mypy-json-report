@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Drop support for Python 3.9
+- Add Python 3.15 to text matrix
+
 ## v1.3.0 [2025-05-07]
 
 - Add Python 3.13 and 3.14 to test matrix
