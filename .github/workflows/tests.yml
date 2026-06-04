@@ -47,28 +47,3 @@ jobs:
 
       - name: Run mypy-json-report
         run: mypy . | mypy-json-report parse --color --output-file known-mypy-errors.json --diff-old-report known-mypy-errors.json
-
-  types:
-    runs-on: ubuntu-slim
-    timeout-minutes: 5
-
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout the code
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-        with:
-          persist-credentials: false
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
-        with:
-          enable-cache: true
-          python-version: "3.10"
-
-      - name: Install dependencies
-        run: uv sync --frozen
-
-      - name: Run mypy
-        run: uv run mypy .
