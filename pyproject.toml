@@ -2,13 +2,12 @@
 name = "mypy-json-report"
 version = "1.3.0"
 description = "Generate a JSON report from your mypy output"
+readme = "README.md"
+license = "Apache-2.0"
 authors = [
     {name = "Charlie Denton", email = "charlie@meshy.co.uk"},
     {name = "Jeppe Fihl-Pearson", email = "jeppe@tenzer.dk"},
 ]
-license = "Apache-2.0"
-repository = "https://github.com/memrise/mypy-json-report"
-readme = "README.md"
 classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
@@ -24,28 +23,38 @@ classifiers = [
     "Topic :: Software Development",
     "Topic :: Utilities",
 ]
+
 requires-python = ">= 3.10"
 dependencies = []
 
-[project.urls]
-Source = "https://github.com/memrise/mypy-json-report"
+[dependency-groups]
+dev = [
+    "mypy==2.1.0",
+    "pytest==9.0.3",
+]
 
 [project.scripts]
 mypy-json-report = "mypy_json_report.cli:main"
 
+[project.urls]
+Homepage = "https://github.com/Memrise/mypy-json-report"
+Documentation = "https://github.com/Memrise/mypy-json-report/blob/main/README.md"
+Repository = "https://github.com/Memrise/mypy-json-report"
+Issues = "https://github.com/Memrise/mypy-json-report/issues"
+Changelog = "https://github.com/Memrise/mypy-json-report/blob/main/CHANGELOG.md"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+only-include = ["mypy_json_report"]
+
 [tool.mypy]
 strict = true
 
-[tool.poetry.group.dev.dependencies]
-mypy = "*"
-pytest = "*"
-
-[build-system]
-requires = ["poetry-core>=2.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.ruff]
-target-version = "py310"
+[tool.ruff.format]
+skip-magic-trailing-comma = true
 
 [tool.ruff.lint]
 select = [
@@ -63,6 +72,3 @@ ignore = [
 combine-as-imports = true
 lines-after-imports = 2
 split-on-trailing-comma = false
-
-[tool.ruff.format]
-skip-magic-trailing-comma = true
