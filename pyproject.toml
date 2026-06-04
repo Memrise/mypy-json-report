@@ -33,11 +33,12 @@ Source = "https://github.com/memrise/mypy-json-report"
 [project.scripts]
 mypy-json-report = "mypy_json_report.cli:main"
 
+[tool.mypy]
+strict = true
+
 [tool.poetry.group.dev.dependencies]
 mypy = "*"
 pytest = "*"
-tox = "*"
-tox-gh-actions = "*"
 
 [build-system]
 requires = ["poetry-core>=2.0.0"]
