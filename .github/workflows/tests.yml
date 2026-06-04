@@ -8,7 +8,7 @@ on:
       - main
 
 jobs:
-  build:
+  tests:
     runs-on: ubuntu-slim
     timeout-minutes: 5
 
@@ -16,6 +16,7 @@ jobs:
       contents: read
 
     strategy:
+      fail-fast: false
       matrix:
         python-version:
           - "3.10"
@@ -43,5 +44,36 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
-      - name: Test with tox
-        run: poetry run tox
+      - name: Run pytest
+        run: poetry run pytest
+
+      - name: Run mypy-json-report
+        run: poetry run mypy . | poetry run mypy-json-report parse --color --output-file known-mypy-errors.json --diff-old-report known-mypy-errors.json
+
+  types:
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.10"
+          cache: poetry
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Run mypy
+        run: poetry run mypy .
