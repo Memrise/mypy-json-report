@@ -1,6 +1,6 @@
 [project]
 name = "mypy-json-report"
-version = "1.3.0"
+version = "1.4.0"
 description = "Generate a JSON report from your mypy output"
 readme = "README.md"
 license = "Apache-2.0"

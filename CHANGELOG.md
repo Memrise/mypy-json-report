@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v1.4.0 [2026-02-04]
+
 - Drop support for Python 3.9
 - Add Python 3.15 to text matrix
 - Stop using tox for running tests
