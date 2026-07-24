@@ -57,7 +57,7 @@ strict = true
 skip-magic-trailing-comma = true
 
 [tool.ruff.lint]
-select = [
+extend-select = [
     "E",  # pycodestyle
     "F",  # Pyflakes
     "I",  # isort
