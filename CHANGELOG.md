@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Drop support for Python 3.10
+- Add support for Python 3.16
+
 ## v1.4.0 [2026-02-04]
 
 - Drop support for Python 3.9
