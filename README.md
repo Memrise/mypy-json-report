@@ -78,16 +78,13 @@ jobs:
   mypy:
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.10"
+        uses: actions/setup-python@v7
 
       - name: Install Python dependencies
-        run: |
-          pip install mypy mypy-json-report
+        run: pip install mypy mypy-json-report
 
       - name: Run mypy
         run: |
